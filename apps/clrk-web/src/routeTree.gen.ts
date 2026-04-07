@@ -10,14 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as DemoTableRouteImport } from './routes/demo/table'
+import { Route as AppReceiptRouteImport } from './routes/_app/receipt'
+import { Route as AppOptimizerRouteImport } from './routes/_app/optimizer'
 import { Route as DemoSentryTestingRouteImport } from './routes/demo/sentry.testing'
 
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +42,16 @@ const DemoTableRoute = DemoTableRouteImport.update({
   path: '/demo/table',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppReceiptRoute = AppReceiptRouteImport.update({
+  id: '/receipt',
+  path: '/receipt',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOptimizerRoute = AppOptimizerRouteImport.update({
+  id: '/optimizer',
+  path: '/optimizer',
+  getParentRoute: () => AppRoute,
+} as any)
 const DemoSentryTestingRoute = DemoSentryTestingRouteImport.update({
   id: '/demo/sentry/testing',
   path: '/demo/sentry/testing',
@@ -44,6 +61,8 @@ const DemoSentryTestingRoute = DemoSentryTestingRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/optimizer': typeof AppOptimizerRoute
+  '/receipt': typeof AppReceiptRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/demo/sentry/testing': typeof DemoSentryTestingRoute
@@ -51,6 +70,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/optimizer': typeof AppOptimizerRoute
+  '/receipt': typeof AppReceiptRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/demo/sentry/testing': typeof DemoSentryTestingRoute
@@ -58,7 +79,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
   '/about': typeof AboutRoute
+  '/_app/optimizer': typeof AppOptimizerRoute
+  '/_app/receipt': typeof AppReceiptRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/demo/sentry/testing': typeof DemoSentryTestingRoute
@@ -68,6 +92,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/optimizer'
+    | '/receipt'
     | '/demo/table'
     | '/demo/tanstack-query'
     | '/demo/sentry/testing'
@@ -75,13 +101,18 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/optimizer'
+    | '/receipt'
     | '/demo/table'
     | '/demo/tanstack-query'
     | '/demo/sentry/testing'
   id:
     | '__root__'
     | '/'
+    | '/_app'
     | '/about'
+    | '/_app/optimizer'
+    | '/_app/receipt'
     | '/demo/table'
     | '/demo/tanstack-query'
     | '/demo/sentry/testing'
@@ -89,6 +120,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
   AboutRoute: typeof AboutRoute
   DemoTableRoute: typeof DemoTableRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
@@ -102,6 +134,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -125,6 +164,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoTableRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/receipt': {
+      id: '/_app/receipt'
+      path: '/receipt'
+      fullPath: '/receipt'
+      preLoaderRoute: typeof AppReceiptRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/optimizer': {
+      id: '/_app/optimizer'
+      path: '/optimizer'
+      fullPath: '/optimizer'
+      preLoaderRoute: typeof AppOptimizerRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/demo/sentry/testing': {
       id: '/demo/sentry/testing'
       path: '/demo/sentry/testing'
@@ -135,8 +188,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppRouteChildren {
+  AppOptimizerRoute: typeof AppOptimizerRoute
+  AppReceiptRoute: typeof AppReceiptRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppOptimizerRoute: AppOptimizerRoute,
+  AppReceiptRoute: AppReceiptRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
   AboutRoute: AboutRoute,
   DemoTableRoute: DemoTableRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
