@@ -1,37 +1,20 @@
-export type TimeFilter = '7D' | '30D' | '3M' | '6M' | '1Y'
+export type OptimizationLevel = 'easy' | 'hard'
 
-export type TransactionStatus = 'completed' | 'pending' | 'refunded' | 'failed'
-
-export interface Transaction {
+export interface CutSuggestion {
   id: string
+  category: string
   merchant: string
-  amount: number
-  date: string
-  category: string
-  status: TransactionStatus
+  currentSpend: number
+  suggestedSpend: number
+  saving: number
+  reason: string
 }
 
-export interface MonthlySpend {
-  label: string
-  amount: number
+export interface OptimizationResult {
+  level: OptimizationLevel
+  totalCurrentSpend: number
+  totalSavings: number
+  suggestions: CutSuggestion[]
 }
 
-export interface CategorySpend {
-  category: string
-  amount: number
-  percentage: number
-}
-
-export interface OptimizerStats {
-  totalSpent: number
-  avgDaily: number
-  topCategory: string
-  transactionCount: number
-}
-
-export interface OptimizerData {
-  stats: OptimizerStats
-  monthlySpend: MonthlySpend[]
-  categorySpend: CategorySpend[]
-  transactions: Transaction[]
-}
+export type OptimizerPhase = 'idle' | 'loading' | 'done' | 'error'

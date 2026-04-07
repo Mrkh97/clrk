@@ -1,9 +1,10 @@
 import { Link } from '@tanstack/react-router'
-import { LayoutDashboard, Receipt, LogOut } from 'lucide-react'
+import { LayoutDashboard, Sparkles, Receipt, LogOut } from 'lucide-react'
 import { Separator } from '#/components/ui/separator'
 
 const NAV_ITEMS = [
-  { label: 'Optimizer', to: '/optimizer', icon: LayoutDashboard },
+  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+  { label: 'Optimizer', to: '/optimizer', icon: Sparkles },
   { label: 'Receipt', to: '/receipt', icon: Receipt },
 ] as const
 

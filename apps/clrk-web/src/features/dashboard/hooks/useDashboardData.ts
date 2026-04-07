@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import type { MonthlySpend, CategorySpend, OptimizerStats, Transaction, TimeFilter, OptimizerData } from '../types'
-import { useOptimizerStore } from '../stores/useOptimizerStore'
+import type { MonthlySpend, CategorySpend, DashboardStats, Transaction, TimeFilter, DashboardData } from '../types'
+import { useDashboardStore } from '../stores/useDashboardStore'
 
 const TRANSACTIONS: Transaction[] = [
   { id: '1', merchant: 'Whole Foods Market', amount: 84.5, date: '2026-04-03', category: 'Food & Dining', status: 'completed' },
@@ -68,7 +68,7 @@ const CATEGORY_DATA: CategorySpend[] = [
   { category: 'Other', amount: 73, percentage: 3 },
 ]
 
-const STATS: Record<TimeFilter, OptimizerStats> = {
+const STATS: Record<TimeFilter, DashboardStats> = {
   '7D': { totalSpent: 531, avgDaily: 75.86, topCategory: 'Shopping', transactionCount: 12 },
   '30D': { totalSpent: 2380, avgDaily: 79.33, topCategory: 'Food & Dining', transactionCount: 47 },
   '3M': { totalSpent: 6600, avgDaily: 73.33, topCategory: 'Food & Dining', transactionCount: 138 },
@@ -76,7 +76,7 @@ const STATS: Record<TimeFilter, OptimizerStats> = {
   '1Y': { totalSpent: 27030, avgDaily: 74.05, topCategory: 'Food & Dining', transactionCount: 523 },
 }
 
-const fetchOptimizerData = (filter: TimeFilter): Promise<OptimizerData> =>
+const fetchDashboardData = (filter: TimeFilter): Promise<DashboardData> =>
   new Promise((resolve) =>
     setTimeout(
       () =>
@@ -90,12 +90,12 @@ const fetchOptimizerData = (filter: TimeFilter): Promise<OptimizerData> =>
     ),
   )
 
-export function useOptimizerData() {
-  const timeFilter = useOptimizerStore((s) => s.timeFilter)
+export function useDashboardData() {
+  const timeFilter = useDashboardStore((s) => s.timeFilter)
 
   return useQuery({
-    queryKey: ['optimizer', timeFilter],
-    queryFn: () => fetchOptimizerData(timeFilter),
+    queryKey: ['dashboard', timeFilter],
+    queryFn: () => fetchDashboardData(timeFilter),
     staleTime: Infinity,
     placeholderData: (prev) => prev,
   })

@@ -1,10 +1,10 @@
-import { useOptimizerStore } from '../../stores/useOptimizerStore'
+import { useDashboardStore } from '../../stores/useDashboardStore'
 import type { TimeFilter as TimeFilterType } from '../../types'
 
 const FILTERS: TimeFilterType[] = ['7D', '30D', '3M', '6M', '1Y']
 
 export default function TimeFilter() {
-  const { timeFilter, setTimeFilter } = useOptimizerStore()
+  const { timeFilter, setTimeFilter } = useDashboardStore()
 
   return (
     <div className="flex gap-1 rounded-lg border border-[#E8E8E8] bg-white p-1">
