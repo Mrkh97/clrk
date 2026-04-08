@@ -1,5 +1,6 @@
-import { Card, CardContent } from '#/components/ui/card'
+import { CardContent } from '#/components/ui/card'
 import { TrendingUp } from 'lucide-react'
+import GlassCard from '#/components/GlassCard'
 
 interface StatCardProps {
   label: string
@@ -10,24 +11,24 @@ interface StatCardProps {
 
 export default function StatCard({ label, value, trend, trendUp }: StatCardProps) {
   return (
-    <Card className="border border-[#E8E8E8] bg-white shadow-none">
+    <GlassCard>
       <CardContent className="p-5">
-        <p className="nd-mono text-[10px] uppercase tracking-widest text-[#999999]">{label}</p>
-        <p className="nd-mono mt-2 text-2xl font-bold text-[#000]">{value}</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
+        <p className="mt-2 font-mono text-2xl font-bold text-foreground">{value}</p>
         {trend && (
           <div className="mt-2 flex items-center gap-1">
             <TrendingUp
               size={12}
-              className={trendUp ? 'text-[#4A9E5C]' : 'text-[#D71921] rotate-180'}
+              className={trendUp ? 'text-success' : 'text-brand rotate-180'}
             />
             <span
-              className={`nd-mono text-[10px] ${trendUp ? 'text-[#4A9E5C]' : 'text-[#D71921]'}`}
+              className={`font-mono text-[10px] ${trendUp ? 'text-success' : 'text-brand'}`}
             >
               {trend}
             </span>
           </div>
         )}
       </CardContent>
-    </Card>
+    </GlassCard>
   )
 }

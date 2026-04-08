@@ -7,12 +7,9 @@ export const Route = createFileRoute('/_app')({
 
 function AppLayout() {
   return (
-    <div
-      className="nd-app flex h-screen overflow-hidden"
-      style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
-    >
+    <div className="flex h-screen overflow-hidden font-display">
       <AppSidebar />
-      <main className="flex-1 overflow-y-auto bg-[#F5F5F5]">
+      <main className="app-bg flex-1 overflow-y-auto">
         <Outlet />
       </main>
     </div>

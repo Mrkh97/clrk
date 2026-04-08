@@ -1,6 +1,8 @@
 import { Link } from '@tanstack/react-router'
 import { LayoutDashboard, Sparkles, Receipt, LogOut } from 'lucide-react'
 import { Separator } from '#/components/ui/separator'
+import { Button } from '#/components/ui/button'
+import ThemeToggle from '#/components/ThemeToggle'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
@@ -10,19 +12,16 @@ const NAV_ITEMS = [
 
 export default function AppSidebar() {
   return (
-    <aside className="flex w-56 flex-shrink-0 flex-col border-r border-[#E8E8E8] bg-white">
+    <aside className="glass-sidebar flex w-56 flex-shrink-0 flex-col">
       {/* Brand */}
       <div className="flex items-center gap-2.5 px-5 py-5">
-        <span className="h-2.5 w-2.5 rounded-full bg-[#D71921]" />
-        <span
-          className="text-base font-bold tracking-tight text-[#000]"
-          style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
-        >
+        <span className="h-2.5 w-2.5 rounded-full bg-brand" />
+        <span className="text-base font-bold tracking-tight text-foreground">
           clrk
         </span>
       </div>
 
-      <Separator className="bg-[#E8E8E8]" />
+      <Separator className="bg-border" />
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4">
@@ -31,21 +30,19 @@ export default function AppSidebar() {
             <Link
               key={item.to}
               to={item.to}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 no-underline transition-colors"
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 no-underline transition-colors hover:bg-accent"
             >
               {({ isActive }: { isActive: boolean }) => (
                 <>
                   <span
-                    className="h-1.5 w-1.5 flex-shrink-0 rounded-full transition-colors"
-                    style={{ background: isActive ? '#D71921' : 'transparent' }}
+                    className={`h-1.5 w-1.5 flex-shrink-0 rounded-full transition-colors ${isActive ? 'bg-brand' : 'bg-transparent'}`}
                   />
                   <item.icon
                     size={15}
-                    className={isActive ? 'text-[#000]' : 'text-[#999999]'}
+                    className={isActive ? 'text-foreground' : 'text-muted-foreground'}
                   />
                   <span
-                    className={`text-sm font-medium ${isActive ? 'text-[#000]' : 'text-[#666666]'}`}
-                    style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
+                    className={`text-sm font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}
                   >
                     {item.label}
                   </span>
@@ -56,20 +53,21 @@ export default function AppSidebar() {
         </div>
       </nav>
 
-      <Separator className="bg-[#E8E8E8]" />
+      <Separator className="bg-border" />
 
-      {/* Sign out */}
-      <div className="px-3 py-4">
-        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-[#F5F5F5]">
+      {/* Theme + Sign out */}
+      <div className="space-y-2 px-3 py-4">
+        <div className="flex justify-center">
+          <ThemeToggle />
+        </div>
+        <Button
+          variant="ghost"
+          className="flex w-full items-center justify-start gap-3 px-3 py-2.5 text-muted-foreground hover:text-foreground"
+        >
           <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" />
-          <LogOut size={15} className="text-[#999999]" />
-          <span
-            className="text-sm font-medium text-[#666666]"
-            style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
-          >
-            Sign Out
-          </span>
-        </button>
+          <LogOut size={15} />
+          <span className="text-sm font-medium">Sign Out</span>
+        </Button>
       </div>
     </aside>
   )

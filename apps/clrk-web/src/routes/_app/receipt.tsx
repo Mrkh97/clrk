@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import GlassCard from '#/components/GlassCard'
 import ReceiptUploadZone from '#/features/receipt/presentations/components/ReceiptUploadZone'
 import ReceiptForm from '#/features/receipt/presentations/components/ReceiptForm'
 import ReceiptList from '#/features/receipt/presentations/components/ReceiptList'
@@ -9,19 +10,14 @@ export const Route = createFileRoute('/_app/receipt')({
 
 function ReceiptPage() {
   return (
-    <div className="nd-dot-grid min-h-full">
+    <div className="min-h-full">
       <div className="mx-auto max-w-6xl p-6">
         {/* Header */}
         <div className="mb-8">
-          <p
-            className="nd-mono mb-1 text-[10px] uppercase tracking-widest text-[#999999]"
-          >
+          <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             Receipts
           </p>
-          <h1
-            className="text-2xl font-bold text-[#000]"
-            style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
-          >
+          <h1 className="font-display text-2xl font-bold text-foreground">
             Scan & Manage
           </h1>
         </div>
@@ -30,15 +26,15 @@ function ReceiptPage() {
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Left: Upload + List */}
           <div className="flex flex-col gap-6">
-            <section className="nd-card p-5">
-              <p className="nd-mono mb-4 text-[10px] uppercase tracking-widest text-[#999999]">
+            <GlassCard className="p-5">
+              <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 Upload Receipt
               </p>
               <ReceiptUploadZone />
-            </section>
+            </GlassCard>
 
             <section>
-              <p className="nd-mono mb-4 text-[10px] uppercase tracking-widest text-[#999999]">
+              <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 Recent Receipts
               </p>
               <ReceiptList />
@@ -47,12 +43,12 @@ function ReceiptPage() {
 
           {/* Right: Form */}
           <div className="lg:sticky lg:top-6 lg:self-start">
-            <section className="nd-card p-5">
-              <p className="nd-mono mb-4 text-[10px] uppercase tracking-widest text-[#999999]">
+            <GlassCard className="p-5">
+              <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 Receipt Details
               </p>
               <ReceiptForm />
-            </section>
+            </GlassCard>
           </div>
         </div>
       </div>

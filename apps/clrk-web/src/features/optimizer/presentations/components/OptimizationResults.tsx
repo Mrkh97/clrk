@@ -1,4 +1,6 @@
 import { RotateCcw } from 'lucide-react'
+import { Button } from '#/components/ui/button'
+import GlassCard from '#/components/GlassCard'
 import { useOptimizerStore } from '../../stores/useOptimizerStore'
 import SuggestionCard from './SuggestionCard'
 
@@ -12,24 +14,21 @@ export default function OptimizationResults() {
   return (
     <div className="space-y-6">
       {/* Summary */}
-      <div className="nd-card p-6 text-center">
-        <p className="nd-mono text-[10px] uppercase tracking-widest text-[#999999]">
+      <GlassCard variant="elevated" className="p-6 text-center">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Potential Monthly Savings
         </p>
-        <p
-          className="mt-2 text-3xl font-bold text-[#D71921]"
-          style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
-        >
+        <p className="mt-2 font-display text-3xl font-bold text-brand">
           ${result.totalSavings.toFixed(2)}
         </p>
-        <p className="nd-mono mt-1 text-xs text-[#666666]">
+        <p className="mt-1 font-mono text-xs text-muted-foreground">
           {pct}% of ${result.totalCurrentSpend.toLocaleString()} monthly spend
         </p>
-      </div>
+      </GlassCard>
 
       {/* Suggestions */}
       <div>
-        <p className="nd-mono mb-3 text-[10px] uppercase tracking-widest text-[#999999]">
+        <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Suggestions ({result.suggestions.length})
         </p>
         <div className="space-y-3">
@@ -41,14 +40,14 @@ export default function OptimizationResults() {
 
       {/* Reset */}
       <div className="flex justify-center">
-        <button
+        <Button
+          variant="outline"
           onClick={reset}
-          className="flex items-center gap-2 rounded-lg border border-[#E8E8E8] px-6 py-2.5 text-sm font-medium text-[#666666] transition-colors hover:bg-[#F5F5F5] hover:text-[#000]"
-          style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
+          className="gap-2 text-muted-foreground hover:text-foreground"
         >
           <RotateCcw size={14} />
           Try Different Level
-        </button>
+        </Button>
       </div>
     </div>
   )

@@ -1,30 +1,28 @@
 import { Scissors } from 'lucide-react'
-import { Card, CardContent } from '#/components/ui/card'
+import { CardContent } from '#/components/ui/card'
+import GlassCard from '#/components/GlassCard'
 import type { CutSuggestion } from '../../types'
 
 export default function SuggestionCard({ suggestion }: { suggestion: CutSuggestion }) {
   return (
-    <Card className="border border-[#E8E8E8] bg-white shadow-none">
+    <GlassCard>
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F5F5F5]">
-              <Scissors size={14} className="text-[#666666]" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-muted">
+              <Scissors size={14} className="text-brand" />
             </div>
             <div>
-              <p
-                className="text-sm font-bold text-[#000]"
-                style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
-              >
+              <p className="font-display text-sm font-bold text-foreground">
                 {suggestion.merchant}
               </p>
-              <p className="nd-mono text-[10px] uppercase tracking-widest text-[#999999]">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 {suggestion.category}
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="nd-mono text-lg font-bold text-[#D71921]">
+            <p className="font-mono text-lg font-bold text-brand">
               −${suggestion.saving.toFixed(2)}
             </p>
           </div>
@@ -32,22 +30,22 @@ export default function SuggestionCard({ suggestion }: { suggestion: CutSuggesti
 
         <div className="mt-4 flex items-center gap-4">
           <div>
-            <p className="nd-mono text-[10px] uppercase tracking-widest text-[#999999]">Now</p>
-            <p className="nd-mono text-sm font-bold text-[#000]">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Now</p>
+            <p className="font-mono text-sm font-bold text-foreground">
               ${suggestion.currentSpend.toFixed(2)}
             </p>
           </div>
-          <div className="h-px flex-1 bg-[#E8E8E8]" />
+          <div className="h-px flex-1 bg-border" />
           <div>
-            <p className="nd-mono text-[10px] uppercase tracking-widest text-[#999999]">Target</p>
-            <p className="nd-mono text-sm font-bold text-[#000]">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Target</p>
+            <p className="font-mono text-sm font-bold text-foreground">
               ${suggestion.suggestedSpend.toFixed(2)}
             </p>
           </div>
         </div>
 
-        <p className="nd-mono mt-3 text-xs text-[#666666]">{suggestion.reason}</p>
+        <p className="mt-3 font-mono text-xs text-muted-foreground">{suggestion.reason}</p>
       </CardContent>
-    </Card>
+    </GlassCard>
   )
 }

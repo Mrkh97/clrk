@@ -4,6 +4,7 @@ import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '#/components/ui/select'
 import { Textarea } from '#/components/ui/textarea'
+import DatePicker from '#/components/DatePicker'
 import { useAddReceipt } from '../../hooks/useReceipts'
 import { useReceiptStore } from '../../stores/useReceiptStore'
 import type { ReceiptCategory, ReceiptFormValues } from '../../types'
@@ -51,17 +52,17 @@ export default function ReceiptForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       {isAiExtracted && (
-        <div className="flex items-center gap-2 rounded-lg border border-[#D71921]/20 bg-[#D71921]/5 px-3 py-2">
-          <span className="nd-mono text-[10px] font-bold uppercase tracking-widest text-[#D71921]">
+        <div className="flex items-center gap-2 rounded-lg border border-brand/20 bg-brand-muted px-3 py-2">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-brand">
             AI Extracted
           </span>
-          <span className="text-xs text-[#666666]">— review and confirm details below</span>
+          <span className="text-xs text-muted-foreground">— review and confirm details below</span>
         </div>
       )}
 
       {/* Merchant */}
       <div className="space-y-1.5">
-        <Label className="nd-mono text-[10px] uppercase tracking-widest text-[#666666]">
+        <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Merchant
         </Label>
         <Input
@@ -69,18 +70,18 @@ export default function ReceiptForm() {
           value={values.merchant}
           onChange={set('merchant')}
           required
-          className="border-x-0 border-t-0 rounded-none border-b border-[#CCCCCC] bg-transparent px-0 text-sm focus-visible:ring-0 focus-visible:border-[#000]"
+          className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 text-sm focus-visible:border-foreground focus-visible:ring-0"
         />
       </div>
 
       {/* Amount + Date */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label className="nd-mono text-[10px] uppercase tracking-widest text-[#666666]">
+          <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             Amount
           </Label>
           <div className="relative">
-            <span className="absolute left-0 top-1/2 -translate-y-1/2 nd-mono text-sm text-[#999999]">$</span>
+            <span className="absolute left-0 top-1/2 -translate-y-1/2 font-mono text-sm text-muted-foreground">$</span>
             <Input
               type="number"
               step="0.01"
@@ -89,34 +90,31 @@ export default function ReceiptForm() {
               value={values.amount}
               onChange={set('amount')}
               required
-              className="border-x-0 border-t-0 rounded-none border-b border-[#CCCCCC] bg-transparent pl-4 px-0 text-sm nd-mono focus-visible:ring-0 focus-visible:border-[#000]"
+              className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent pl-4 px-0 text-sm font-mono focus-visible:border-foreground focus-visible:ring-0"
             />
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label className="nd-mono text-[10px] uppercase tracking-widest text-[#666666]">
+          <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             Date
           </Label>
-          <Input
-            type="date"
+          <DatePicker
             value={values.date}
-            onChange={set('date')}
-            required
-            className="border-x-0 border-t-0 rounded-none border-b border-[#CCCCCC] bg-transparent px-0 text-sm nd-mono focus-visible:ring-0 focus-visible:border-[#000]"
+            onChange={(date) => setValues((prev) => ({ ...prev, date }))}
           />
         </div>
       </div>
 
       {/* Category */}
       <div className="space-y-1.5">
-        <Label className="nd-mono text-[10px] uppercase tracking-widest text-[#666666]">
+        <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Category
         </Label>
         <Select
           value={values.category}
           onValueChange={(v) => setValues((prev) => ({ ...prev, category: v as ReceiptCategory }))}
         >
-          <SelectTrigger className="border-x-0 border-t-0 rounded-none border-b border-[#CCCCCC] bg-transparent px-0 text-sm focus:ring-0 focus:border-[#000]">
+          <SelectTrigger className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 text-sm focus:border-foreground focus:ring-0">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -131,30 +129,31 @@ export default function ReceiptForm() {
 
       {/* Payment method */}
       <div className="space-y-1.5">
-        <Label className="nd-mono text-[10px] uppercase tracking-widest text-[#666666]">
+        <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Payment Method
         </Label>
         <div className="flex gap-2">
           {PAYMENT_METHODS.map((pm) => (
-            <button
+            <Button
               key={pm.value}
               type="button"
+              variant={values.paymentMethod === pm.value ? 'default' : 'outline'}
               onClick={() => setValues((prev) => ({ ...prev, paymentMethod: pm.value }))}
-              className={`nd-mono flex-1 rounded-lg border py-2 text-xs uppercase tracking-wider transition-colors ${
+              className={`flex-1 font-mono text-xs uppercase tracking-wider ${
                 values.paymentMethod === pm.value
-                  ? 'border-[#000] bg-[#000] text-white'
-                  : 'border-[#E8E8E8] bg-white text-[#666666] hover:border-[#000]'
+                  ? 'bg-brand text-brand-foreground hover:bg-brand/90'
+                  : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
               }`}
             >
               {pm.label}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
 
       {/* Notes */}
       <div className="space-y-1.5">
-        <Label className="nd-mono text-[10px] uppercase tracking-widest text-[#666666]">
+        <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Notes
         </Label>
         <Textarea
@@ -162,7 +161,7 @@ export default function ReceiptForm() {
           value={values.notes}
           onChange={set('notes')}
           rows={3}
-          className="resize-none border border-[#E8E8E8] bg-white text-sm focus-visible:ring-0 focus-visible:border-[#000]"
+          className="resize-none border border-border bg-transparent text-sm focus-visible:border-foreground focus-visible:ring-0"
         />
       </div>
 
@@ -170,7 +169,7 @@ export default function ReceiptForm() {
       <Button
         type="submit"
         disabled={isPending}
-        className="nd-mono mt-1 w-full rounded-full bg-[#000] py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#222] disabled:opacity-50"
+        className="mt-1 w-full rounded-full bg-brand py-3 font-mono text-xs font-bold uppercase tracking-widest text-brand-foreground hover:bg-brand/90 disabled:opacity-50"
       >
         {isPending ? 'Saving...' : 'Save Receipt'}
       </Button>

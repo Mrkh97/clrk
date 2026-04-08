@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  Area,
+  AreaChart,
 } from 'recharts'
 import type { MonthlySpend } from '../../types'
 
@@ -21,9 +21,9 @@ function CustomTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-[#E8E8E8] bg-[#000] px-3 py-2 shadow-lg">
-      <p className="nd-mono text-[10px] uppercase tracking-wider text-[#666666]">{label}</p>
-      <p className="nd-mono text-sm font-bold text-white">
+    <div className="glass-heavy rounded-lg px-3 py-2 shadow-lg">
+      <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="font-mono text-sm font-bold text-foreground">
         ${payload[0].value.toLocaleString()}
       </p>
     </div>
@@ -38,35 +38,42 @@ export default function SpendingChart({ data }: SpendingChartProps) {
   }, [])
 
   if (!mounted) {
-    return <div className="h-48 animate-pulse rounded-xl bg-[#F5F5F5]" />
+    return <div className="h-48 animate-pulse rounded-xl bg-muted" />
   }
 
   return (
     <ResponsiveContainer width="100%" height={192}>
-      <LineChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
+      <AreaChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+        <defs>
+          <linearGradient id="brandGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="oklch(0.52 0.21 22)" stopOpacity={0.3} />
+            <stop offset="100%" stopColor="oklch(0.52 0.21 22)" stopOpacity={0.02} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
         <XAxis
           dataKey="label"
-          tick={{ fontSize: 10, fontFamily: 'Space Mono', fill: '#999999' }}
+          tick={{ fontSize: 10, fontFamily: 'Space Mono', fill: 'var(--muted-foreground)' }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
-          tick={{ fontSize: 10, fontFamily: 'Space Mono', fill: '#999999' }}
+          tick={{ fontSize: 10, fontFamily: 'Space Mono', fill: 'var(--muted-foreground)' }}
           axisLine={false}
           tickLine={false}
           tickFormatter={(v: number) => `$${v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v}`}
         />
-        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#E8E8E8', strokeWidth: 1 }} />
-        <Line
+        <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--border)', strokeWidth: 1 }} />
+        <Area
           type="monotone"
           dataKey="amount"
-          stroke="#D71921"
+          stroke="oklch(0.52 0.21 22)"
           strokeWidth={2}
-          dot={{ fill: '#D71921', r: 3, strokeWidth: 0 }}
-          activeDot={{ fill: '#D71921', r: 5, strokeWidth: 2, stroke: '#fff' }}
+          fill="url(#brandGradient)"
+          dot={{ fill: 'oklch(0.52 0.21 22)', r: 3, strokeWidth: 0 }}
+          activeDot={{ fill: 'oklch(0.52 0.21 22)', r: 5, strokeWidth: 2, stroke: '#fff' }}
         />
-      </LineChart>
+      </AreaChart>
     </ResponsiveContainer>
   )
 }

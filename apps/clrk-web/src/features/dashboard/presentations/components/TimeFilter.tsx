@@ -1,3 +1,4 @@
+import { Button } from '#/components/ui/button'
 import { useDashboardStore } from '../../stores/useDashboardStore'
 import type { TimeFilter as TimeFilterType } from '../../types'
 
@@ -7,19 +8,21 @@ export default function TimeFilter() {
   const { timeFilter, setTimeFilter } = useDashboardStore()
 
   return (
-    <div className="flex gap-1 rounded-lg border border-[#E8E8E8] bg-white p-1">
+    <div className="glass flex gap-1 rounded-lg p-1">
       {FILTERS.map((f) => (
-        <button
+        <Button
           key={f}
+          variant={timeFilter === f ? 'default' : 'ghost'}
+          size="sm"
           onClick={() => setTimeFilter(f)}
-          className={`nd-mono flex-1 rounded-md py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+          className={`flex-1 font-mono text-xs font-bold uppercase tracking-wider ${
             timeFilter === f
-              ? 'bg-[#000] text-white'
-              : 'text-[#666666] hover:bg-[#F5F5F5] hover:text-[#000]'
+              ? 'bg-brand text-brand-foreground hover:bg-brand/90'
+              : 'text-muted-foreground hover:text-foreground'
           }`}
         >
           {f}
-        </button>
+        </Button>
       ))}
     </div>
   )
