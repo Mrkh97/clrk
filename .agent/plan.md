@@ -1,0 +1,11 @@
+- [x] Context gathered
+- [ ] API env + scripts
+- [ ] Drizzle pg schema + migrations
+- [ ] Better Auth in Hono on `/api/auth/*`
+- [ ] Session middleware + protected helper
+- [ ] Protected image extraction endpoint
+- [ ] Web auth client
+- [ ] `/login` and `/register`
+- [ ] Protect all non-public routes
+- [ ] Hook receipt upload to API
+- [ ] Verify build + flows

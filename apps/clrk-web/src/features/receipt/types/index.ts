@@ -24,6 +24,33 @@ export interface Receipt {
   aiExtracted: boolean
 }
 
+export interface ExtractedReceiptItem {
+  name: string
+  quantity?: number | null
+  unitPrice?: number | null
+  totalPrice?: number | null
+}
+
+export interface ExtractedReceipt {
+  merchant: string | null
+  currency: string | null
+  date?: string | null
+  subtotal?: number | null
+  tax?: number | null
+  tip?: number | null
+  total?: number | null
+  paymentMethod?: PaymentMethod | null
+  notes?: string | null
+  rawText?: string | null
+  confidence?: number | null
+  items: ExtractedReceiptItem[]
+}
+
+export interface ReceiptExtractionResponse {
+  fileName: string
+  receipt: ExtractedReceipt
+}
+
 export interface UploadState {
   phase: 'idle' | 'dragging' | 'processing' | 'complete' | 'error'
   progress: number
@@ -38,4 +65,8 @@ export interface ReceiptFormValues {
   category: ReceiptCategory
   paymentMethod: PaymentMethod
   notes: string
+}
+
+export interface CreateReceiptInput extends ReceiptFormValues {
+  aiExtracted?: boolean
 }

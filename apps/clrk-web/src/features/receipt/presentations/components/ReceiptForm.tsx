@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
@@ -7,7 +7,7 @@ import { Textarea } from '#/components/ui/textarea'
 import DatePicker from '#/components/DatePicker'
 import { useAddReceipt } from '../../hooks/useReceipts'
 import { useReceiptStore } from '../../stores/useReceiptStore'
-import type { ReceiptCategory, ReceiptFormValues } from '../../types'
+import type { ExtractedReceipt, ReceiptCategory, ReceiptFormValues } from '../../types'
 
 const CATEGORIES: { value: ReceiptCategory; label: string }[] = [
   { value: 'food', label: 'Food & Dining' },
@@ -37,8 +37,26 @@ const defaultValues: ReceiptFormValues = {
 export default function ReceiptForm() {
   const [values, setValues] = useState<ReceiptFormValues>(defaultValues)
   const { mutate: addReceipt, isPending } = useAddReceipt()
-  const { uploadState } = useReceiptStore()
+  const { uploadState, extractedReceipt, resetUpload } = useReceiptStore()
   const isAiExtracted = uploadState.phase === 'complete'
+
+  useEffect(() => {
+    if (!extractedReceipt) {
+      return
+    }
+
+    setValues((current) => ({
+      ...current,
+      merchant: extractedReceipt.merchant || current.merchant,
+      amount:
+        extractedReceipt.total != null
+          ? extractedReceipt.total.toFixed(2)
+          : current.amount,
+      date: normalizeReceiptDate(extractedReceipt.date) ?? current.date,
+      paymentMethod: extractedReceipt.paymentMethod ?? current.paymentMethod,
+      notes: extractedReceipt.notes ?? current.notes,
+    }))
+  }, [extractedReceipt])
 
   const set = (field: keyof ReceiptFormValues) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -46,17 +64,32 @@ export default function ReceiptForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    addReceipt(values, { onSuccess: () => setValues(defaultValues) })
+    addReceipt(
+      {
+        ...values,
+        aiExtracted: Boolean(extractedReceipt),
+      },
+      {
+        onSuccess: () => {
+          setValues(defaultValues)
+          resetUpload()
+        },
+      },
+    )
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       {isAiExtracted && (
-        <div className="flex items-center gap-2 rounded-lg border border-brand/20 bg-brand-muted px-3 py-2">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-brand">
-            AI Extracted
-          </span>
-          <span className="text-xs text-muted-foreground">— review and confirm details below</span>
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 rounded-lg border border-brand/20 bg-brand-muted px-3 py-2">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-brand">
+              AI Extracted
+            </span>
+            <span className="text-xs text-muted-foreground">review and confirm details below</span>
+          </div>
+
+          {extractedReceipt && <ExtractedReceiptPreview receipt={extractedReceipt} />}
         </div>
       )}
 
@@ -174,5 +207,115 @@ export default function ReceiptForm() {
         {isPending ? 'Saving...' : 'Save Receipt'}
       </Button>
     </form>
+  )
+}
+
+function normalizeReceiptDate(value?: string | null) {
+  if (!value) {
+    return null
+  }
+
+  const parsed = new Date(value)
+
+  if (Number.isNaN(parsed.getTime())) {
+    return null
+  }
+
+  return parsed.toISOString().slice(0, 10)
+}
+
+function formatMoney(amount?: number | null, currency = 'USD') {
+  if (amount == null) {
+    return '—'
+  }
+
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+  }).format(amount)
+}
+
+function ExtractedReceiptPreview({ receipt }: { receipt: ExtractedReceipt }) {
+  const moneyCurrency = receipt.currency || 'USD'
+  const visibleItems = receipt.items.slice(0, 3)
+
+  return (
+    <div className="glass rounded-xl p-4">
+      <div className="flex items-start justify-between gap-3 border-b border-border/70 pb-3">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Extracted Summary
+          </p>
+          <p className="mt-1 text-sm font-semibold text-foreground">
+            {receipt.merchant || 'Unknown merchant'}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Confidence
+          </p>
+          <p className="mt-1 font-mono text-sm font-bold text-brand">
+            {receipt.confidence != null ? `${Math.round(receipt.confidence * 100)}%` : '—'}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+        <SummaryField label="Total" value={formatMoney(receipt.total, moneyCurrency)} />
+        <SummaryField label="Subtotal" value={formatMoney(receipt.subtotal, moneyCurrency)} />
+        <SummaryField label="Tax" value={formatMoney(receipt.tax, moneyCurrency)} />
+        <SummaryField label="Tip" value={formatMoney(receipt.tip, moneyCurrency)} />
+        <SummaryField label="Currency" value={moneyCurrency} />
+        <SummaryField label="Payment" value={receipt.paymentMethod ?? 'Needs review'} />
+      </div>
+
+      {visibleItems.length > 0 && (
+        <div className="mt-4 space-y-2 border-t border-border/70 pt-3">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Line Items
+          </p>
+          {visibleItems.map((item, index) => (
+            <div key={`${item.name}-${index}`} className="flex items-center justify-between gap-3 text-sm">
+              <div className="min-w-0">
+                <p className="truncate font-medium text-foreground">{item.name}</p>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Qty {item.quantity ?? 1}
+                </p>
+              </div>
+              <p className="font-mono text-xs font-bold text-foreground">
+                {formatMoney(item.totalPrice ?? item.unitPrice, moneyCurrency)}
+              </p>
+            </div>
+          ))}
+          {receipt.items.length > visibleItems.length && (
+            <p className="text-xs text-muted-foreground">
+              +{receipt.items.length - visibleItems.length} more extracted item{receipt.items.length - visibleItems.length === 1 ? '' : 's'}
+            </p>
+          )}
+        </div>
+      )}
+
+      {receipt.rawText && (
+        <div className="mt-4 border-t border-border/70 pt-3">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Raw Text Snapshot
+          </p>
+          <p className="mt-2 line-clamp-4 text-xs leading-5 text-muted-foreground">
+            {receipt.rawText}
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SummaryField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-1 font-mono text-sm font-bold text-foreground">{value}</p>
+    </div>
   )
 }

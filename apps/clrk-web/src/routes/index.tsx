@@ -15,6 +15,7 @@ import { Badge } from '#/components/ui/badge'
 import { Separator } from '#/components/ui/separator'
 import GlassCard from '#/components/GlassCard'
 import ThemeToggle from '#/components/ThemeToggle'
+import { useAuthSession } from '#/lib/auth-client'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -158,6 +159,8 @@ function HeroChart() {
 
 function LandingPage() {
   useRevealOnScroll()
+  const { data: session } = useAuthSession()
+  const isAuthenticated = Boolean(session)
 
   return (
     <div className="landing-bg min-h-screen">
@@ -193,7 +196,11 @@ function LandingPage() {
               size="sm"
               className="bg-brand font-mono text-xs uppercase tracking-wider text-brand-foreground hover:bg-brand/90"
             >
-              <Link to="/dashboard">Get Started</Link>
+              {isAuthenticated ? (
+                <Link to="/dashboard">Open Dashboard</Link>
+              ) : (
+                <Link to="/register">Get Started</Link>
+              )}
             </Button>
           </div>
         </div>
@@ -238,10 +245,17 @@ function LandingPage() {
               size="lg"
               className="bg-brand font-mono text-xs font-bold uppercase tracking-widest text-brand-foreground hover:bg-brand/90"
             >
-              <Link to="/dashboard">
-                Get Started Free
-                <ArrowRight size={14} />
-              </Link>
+              {isAuthenticated ? (
+                <Link to="/dashboard">
+                  Open Dashboard
+                  <ArrowRight size={14} />
+                </Link>
+              ) : (
+                <Link to="/register">
+                  Get Started Free
+                  <ArrowRight size={14} />
+                </Link>
+              )}
             </Button>
             <Button asChild variant="outline" size="lg" className="font-mono text-xs uppercase tracking-wider">
               <a href="#features">See How It Works</a>
