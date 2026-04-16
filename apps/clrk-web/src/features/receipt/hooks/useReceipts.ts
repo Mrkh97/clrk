@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Receipt, ReceiptFormValues } from '../types'
+import type { CreateReceiptInput, Receipt } from '../types'
 
 const DUMMY_RECEIPTS: Receipt[] = [
   {
@@ -78,7 +78,7 @@ let receipts = [...DUMMY_RECEIPTS]
 const fetchReceipts = (): Promise<Receipt[]> =>
   new Promise((resolve) => setTimeout(() => resolve([...receipts]), 300))
 
-const addReceipt = (values: ReceiptFormValues): Promise<Receipt> =>
+const addReceipt = (values: CreateReceiptInput): Promise<Receipt> =>
   new Promise((resolve) => {
     const newReceipt: Receipt = {
       id: String(Date.now()),
@@ -90,7 +90,7 @@ const addReceipt = (values: ReceiptFormValues): Promise<Receipt> =>
       paymentMethod: values.paymentMethod,
       notes: values.notes,
       status: 'complete',
-      aiExtracted: false,
+      aiExtracted: Boolean(values.aiExtracted),
     }
     receipts = [newReceipt, ...receipts]
     setTimeout(() => resolve(newReceipt), 300)

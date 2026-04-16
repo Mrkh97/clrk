@@ -1,4 +1,0 @@
-const tsrStartManifest = () => ({ "routes": { "__root__": { "filePath": "/Users/mohammadrezakhorasanchian/Developer/clrk/apps/clrk-web/src/routes/__root.tsx", "children": ["/", "/_app"], "preloads": ["/assets/main-D7k4TnnA.js"] }, "/_app": { "filePath": "/Users/mohammadrezakhorasanchian/Developer/clrk/apps/clrk-web/src/routes/_app.tsx", "children": ["/_app/optimizer", "/_app/receipt"], "preloads": ["/assets/_app-Dat8_ElL.js", "/assets/utils-DUXQ0vkc.js", "/assets/index-D8b41ubn.js"] }, "/_app/optimizer": { "filePath": "/Users/mohammadrezakhorasanchian/Developer/clrk/apps/clrk-web/src/routes/_app/optimizer.tsx", "preloads": ["/assets/optimizer-D0947JC0.js", "/assets/card-DVOyyN0r.js"] }, "/_app/receipt": { "filePath": "/Users/mohammadrezakhorasanchian/Developer/clrk/apps/clrk-web/src/routes/_app/receipt.tsx", "preloads": ["/assets/receipt-BniFQNVv.js", "/assets/card-DVOyyN0r.js"] } }, "clientEntry": "/assets/main-D7k4TnnA.js" });
-export {
-  tsrStartManifest
-};
