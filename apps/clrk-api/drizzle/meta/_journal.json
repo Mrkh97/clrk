@@ -8,6 +8,13 @@
       "when": 1776287938570,
       "tag": "0000_superb_bastion",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776513724414,
+      "tag": "0001_demonic_slyde",
+      "breakpoints": true
     }
   ]
 }

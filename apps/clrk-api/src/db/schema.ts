@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm'
-import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { boolean, doublePrecision, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -64,9 +64,39 @@ export const verification = pgTable(
   (table) => [index('verification_identifier_idx').on(table.identifier)],
 )
 
+export const receipt = pgTable(
+  'receipt',
+  {
+    id: text('id').primaryKey(),
+    userId: text('userId')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    merchant: text('merchant').notNull(),
+    amount: doublePrecision('amount').notNull(),
+    currency: text('currency').notNull().default('USD'),
+    date: timestamp('date', { mode: 'date' }).notNull(),
+    category: text('category').notNull(),
+    paymentMethod: text('paymentMethod').notNull(),
+    notes: text('notes'),
+    status: text('status').notNull().default('complete'),
+    aiExtracted: boolean('aiExtracted').notNull().default(false),
+    createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt', { mode: 'date' })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('receipt_userId_idx').on(table.userId),
+    index('receipt_userId_date_idx').on(table.userId, table.date),
+    index('receipt_userId_category_idx').on(table.userId, table.category),
+  ],
+)
+
 export const userRelations = relations(user, ({ many }) => ({
   accounts: many(account),
   sessions: many(session),
+  receipts: many(receipt),
 }))
 
 export const accountRelations = relations(account, ({ one }) => ({
@@ -79,6 +109,13 @@ export const accountRelations = relations(account, ({ one }) => ({
 export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, {
     fields: [session.userId],
+    references: [user.id],
+  }),
+}))
+
+export const receiptRelations = relations(receipt, ({ one }) => ({
+  user: one(user, {
+    fields: [receipt.userId],
     references: [user.id],
   }),
 }))
