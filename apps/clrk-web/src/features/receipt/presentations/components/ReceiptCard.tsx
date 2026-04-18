@@ -1,35 +1,39 @@
 import { CardContent } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
+import { Button } from '#/components/ui/button'
 import GlassCard from '#/components/GlassCard'
 import StatusBadge from '#/components/StatusBadge'
-import type { Receipt } from '../../types'
+import { RECEIPT_CATEGORY_LABELS, type Receipt } from '../../types'
 
-const CATEGORY_LABELS: Record<string, string> = {
-  food: 'Food & Dining',
-  transport: 'Transport',
-  utilities: 'Utilities',
-  entertainment: 'Entertainment',
-  health: 'Health',
-  shopping: 'Shopping',
-  other: 'Other',
+function formatDateOnly(value: string) {
+  const [year, month, day] = value.split('-').map(Number)
+
+  if (!year || !month || !day) {
+    return value
+  }
+
+  return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 interface ReceiptCardProps {
   receipt: Receipt
   onClick?: () => void
+  onDelete?: () => void
+  isDeleting?: boolean
+  selected?: boolean
 }
 
-export default function ReceiptCard({ receipt, onClick }: ReceiptCardProps) {
+export default function ReceiptCard({ receipt, onClick, onDelete, isDeleting, selected }: ReceiptCardProps) {
   const formattedAmount = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: receipt.currency,
   }).format(receipt.amount)
 
-  const formattedDate = new Date(receipt.date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  const formattedDate = formatDateOnly(receipt.date)
 
   const statusMap: Record<string, 'completed' | 'pending' | 'processing' | 'error'> = {
     complete: 'completed',
@@ -40,7 +44,7 @@ export default function ReceiptCard({ receipt, onClick }: ReceiptCardProps) {
 
   return (
     <GlassCard
-      className="cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md"
+      className={`cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md ${selected ? 'ring-1 ring-brand shadow-md' : ''}`}
       onClick={onClick}
     >
       <CardContent className="p-4">
@@ -49,7 +53,7 @@ export default function ReceiptCard({ receipt, onClick }: ReceiptCardProps) {
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-foreground">{receipt.merchant}</p>
             <p className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              {CATEGORY_LABELS[receipt.category]}
+              {RECEIPT_CATEGORY_LABELS[receipt.category]}
             </p>
           </div>
           {receipt.aiExtracted && (
@@ -70,12 +74,29 @@ export default function ReceiptCard({ receipt, onClick }: ReceiptCardProps) {
 
         {/* Payment method badge */}
         <div className="mt-2">
-          <Badge
-            variant="outline"
-            className="border-border bg-accent font-mono text-[9px] uppercase tracking-wider text-muted-foreground"
-          >
-            {receipt.paymentMethod}
-          </Badge>
+          <div className="flex items-center justify-between gap-2">
+            <Badge
+              variant="outline"
+              className="border-border bg-accent font-mono text-[9px] uppercase tracking-wider text-muted-foreground"
+            >
+              {receipt.paymentMethod}
+            </Badge>
+            {onDelete ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={isDeleting}
+                className="h-7 px-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:text-destructive"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onDelete()
+                }}
+              >
+                {isDeleting ? 'Deleting…' : 'Delete'}
+              </Button>
+            ) : null}
+          </div>
         </div>
       </CardContent>
     </GlassCard>

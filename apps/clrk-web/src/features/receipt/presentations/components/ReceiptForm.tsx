@@ -5,7 +5,7 @@ import { Label } from '#/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '#/components/ui/select'
 import { Textarea } from '#/components/ui/textarea'
 import DatePicker from '#/components/DatePicker'
-import { useAddReceipt } from '../../hooks/useReceipts'
+import { useAddReceipt, useReceipt, useUpdateReceipt } from '../../hooks/useReceipts'
 import { useReceiptStore } from '../../stores/useReceiptStore'
 import type { ExtractedReceipt, ReceiptCategory, ReceiptFormValues } from '../../types'
 
@@ -36,12 +36,31 @@ const defaultValues: ReceiptFormValues = {
 
 export default function ReceiptForm() {
   const [values, setValues] = useState<ReceiptFormValues>(defaultValues)
-  const { mutate: addReceipt, isPending } = useAddReceipt()
-  const { uploadState, extractedReceipt, resetUpload } = useReceiptStore()
-  const isAiExtracted = uploadState.phase === 'complete'
+  const { mutate: addReceipt, isPending: isCreating } = useAddReceipt()
+  const { mutate: updateReceipt, isPending: isUpdating } = useUpdateReceipt()
+  const { uploadState, extractedReceipt, resetUpload, selectedReceiptId, selectReceipt } = useReceiptStore()
+  const { data: selectedReceipt, isLoading: isLoadingSelectedReceipt } = useReceipt(selectedReceiptId)
+  const isEditing = Boolean(selectedReceiptId)
+  const isPending = isCreating || isUpdating
+  const isAiExtracted = uploadState.phase === 'complete' && !isEditing
 
   useEffect(() => {
-    if (!extractedReceipt) {
+    if (!selectedReceipt) {
+      return
+    }
+
+    setValues({
+      merchant: selectedReceipt.merchant,
+      amount: selectedReceipt.amount.toFixed(2),
+      date: selectedReceipt.date,
+      category: selectedReceipt.category,
+      paymentMethod: selectedReceipt.paymentMethod,
+      notes: selectedReceipt.notes ?? '',
+    })
+  }, [selectedReceipt])
+
+  useEffect(() => {
+    if (!extractedReceipt || isEditing) {
       return
     }
 
@@ -56,7 +75,7 @@ export default function ReceiptForm() {
       paymentMethod: extractedReceipt.paymentMethod ?? current.paymentMethod,
       notes: extractedReceipt.notes ?? current.notes,
     }))
-  }, [extractedReceipt])
+  }, [extractedReceipt, isEditing])
 
   const set = (field: keyof ReceiptFormValues) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -64,22 +83,56 @@ export default function ReceiptForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    addReceipt(
-      {
-        ...values,
-        aiExtracted: Boolean(extractedReceipt),
-      },
-      {
-        onSuccess: () => {
-          setValues(defaultValues)
-          resetUpload()
-        },
-      },
-    )
+
+    const aiExtracted = isEditing
+      ? (selectedReceipt?.aiExtracted ?? false)
+      : Boolean(extractedReceipt)
+
+    const payload = {
+      ...values,
+      aiExtracted,
+    }
+
+    const onSuccess = () => {
+      setValues(defaultValues)
+      resetUpload()
+      selectReceipt(null)
+    }
+
+    if (selectedReceiptId) {
+      if (!selectedReceipt) {
+        return
+      }
+
+      updateReceipt({ id: selectedReceiptId, values: payload }, { onSuccess })
+      return
+    }
+
+    addReceipt(payload, { onSuccess })
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      {isEditing && (
+        <div className="flex items-center justify-between rounded-lg border border-brand/20 bg-brand-muted px-3 py-2">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-brand">
+            Editing receipt
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
+            onClick={() => {
+              selectReceipt(null)
+              setValues(defaultValues)
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
+
       {isAiExtracted && (
         <div className="space-y-3">
           <div className="flex items-center gap-2 rounded-lg border border-brand/20 bg-brand-muted px-3 py-2">
@@ -201,10 +254,10 @@ export default function ReceiptForm() {
       {/* Submit */}
       <Button
         type="submit"
-        disabled={isPending}
+        disabled={isPending || (isEditing && isLoadingSelectedReceipt)}
         className="mt-1 w-full rounded-full bg-brand py-3 font-mono text-xs font-bold uppercase tracking-widest text-brand-foreground hover:bg-brand/90 disabled:opacity-50"
       >
-        {isPending ? 'Saving...' : 'Save Receipt'}
+        {isPending ? 'Saving...' : isEditing && isLoadingSelectedReceipt ? 'Loading…' : isEditing ? 'Update Receipt' : 'Save Receipt'}
       </Button>
     </form>
   )
