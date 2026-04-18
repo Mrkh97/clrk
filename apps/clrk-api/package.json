@@ -4,8 +4,11 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
+    "test": "tsx --test src/**/*.test.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "seed:receipts": "tsx src/scripts/seed-receipts.ts",
+    "seed:receipts:apply": "tsx src/scripts/seed-receipts.ts --apply",
     "start": "node dist/src/index.js"
   },
   "dependencies": {
