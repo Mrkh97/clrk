@@ -3,7 +3,18 @@ import { CardContent } from '#/components/ui/card'
 import GlassCard from '#/components/GlassCard'
 import type { CutSuggestion } from '../../types'
 
-export default function SuggestionCard({ suggestion }: { suggestion: CutSuggestion }) {
+export default function SuggestionCard({
+  currency,
+  suggestion,
+}: {
+  currency: string
+  suggestion: CutSuggestion
+}) {
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+  })
+
   return (
     <GlassCard>
       <CardContent className="p-5">
@@ -23,7 +34,7 @@ export default function SuggestionCard({ suggestion }: { suggestion: CutSuggesti
           </div>
           <div className="text-right">
             <p className="font-mono text-lg font-bold text-brand">
-              −${suggestion.saving.toFixed(2)}
+              -{formatter.format(suggestion.saving)}
             </p>
           </div>
         </div>
@@ -32,14 +43,14 @@ export default function SuggestionCard({ suggestion }: { suggestion: CutSuggesti
           <div>
             <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Now</p>
             <p className="font-mono text-sm font-bold text-foreground">
-              ${suggestion.currentSpend.toFixed(2)}
+              {formatter.format(suggestion.currentSpend)}
             </p>
           </div>
           <div className="h-px flex-1 bg-border" />
           <div>
             <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Target</p>
             <p className="font-mono text-sm font-bold text-foreground">
-              ${suggestion.suggestedSpend.toFixed(2)}
+              {formatter.format(suggestion.suggestedSpend)}
             </p>
           </div>
         </div>

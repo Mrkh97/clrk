@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { DEFAULT_RECEIPT_CURRENCY, resolveReceiptCurrency } from './currency.js'
 
 export const receiptCategories = [
   'food',
@@ -35,7 +36,7 @@ const optionalTrimmedString = z
 export const receiptBaseSchema = z.object({
   merchant: z.string().trim().min(1),
   amount: z.number().finite().nonnegative(),
-  currency: z.string().trim().min(1).default('USD'),
+  currency: z.string().trim().min(1).transform((value) => resolveReceiptCurrency(value)).default(DEFAULT_RECEIPT_CURRENCY),
   date: receiptDateSchema,
   category: receiptCategorySchema,
   paymentMethod: paymentMethodSchema,
@@ -77,9 +78,16 @@ export const dashboardQuerySchema = z.object({
 
 export const optimizerLevelSchema = z.enum(['easy', 'hard'])
 
-export const optimizerRequestSchema = z.object({
-  level: optimizerLevelSchema,
-})
+export const optimizerRequestSchema = z
+  .object({
+    level: optimizerLevelSchema,
+    from: receiptDateSchema,
+    to: receiptDateSchema,
+  })
+  .refine((value) => value.from <= value.to, {
+    message: '`from` must be on or before `to`.',
+    path: ['from'],
+  })
 
 export const extractedReceiptSchema = z.object({
   merchant: z.string().nullable(),
@@ -109,3 +117,4 @@ export type DashboardTimeFilter = z.infer<typeof dashboardTimeFilterSchema>
 export type CreateReceipt = z.infer<typeof createReceiptSchema>
 export type UpdateReceipt = z.infer<typeof updateReceiptSchema>
 export type OptimizerLevel = z.infer<typeof optimizerLevelSchema>
+export type OptimizerRequest = z.infer<typeof optimizerRequestSchema>

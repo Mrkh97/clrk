@@ -15,6 +15,7 @@ test('createOptimizerAnalysis returns savings-oriented suggestions for easy leve
 
   const analysis = createOptimizerAnalysis(receipts, 'easy')
 
+  assert.equal(analysis.currency, 'TRY')
   assert.equal(analysis.level, 'easy')
   assert.ok(analysis.totalCurrentSpend > 0)
   assert.ok(analysis.totalSavings > 0)
@@ -36,6 +37,7 @@ test('hard level produces at least as much savings as easy level for the same re
   const easyAnalysis = createOptimizerAnalysis(receipts, 'easy')
   const hardAnalysis = createOptimizerAnalysis(receipts, 'hard')
 
+  assert.equal(hardAnalysis.currency, 'TRY')
   assert.ok(hardAnalysis.totalSavings >= easyAnalysis.totalSavings)
   assert.ok(hardAnalysis.suggestions.length > 0)
   assert.ok(hardAnalysis.suggestions.some((suggestion) => /subscription|streaming|shopping|food/i.test(suggestion.reason)))

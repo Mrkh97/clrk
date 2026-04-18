@@ -6,6 +6,7 @@ export interface Transaction {
   id: string
   merchant: string
   amount: number
+  currency: string
   date: string
   category: string
   status: TransactionStatus
@@ -30,6 +31,7 @@ export interface DashboardStats {
 }
 
 export interface DashboardData {
+  currency: string
   stats: DashboardStats
   monthlySpend: MonthlySpend[]
   categorySpend: CategorySpend[]

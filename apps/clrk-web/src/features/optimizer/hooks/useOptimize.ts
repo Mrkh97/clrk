@@ -3,7 +3,14 @@ import { apiBaseUrl } from '#/lib/auth-client'
 import type { OptimizationLevel, OptimizationResult, CutSuggestion } from '../types'
 import { useOptimizerStore } from '../stores/useOptimizerStore'
 
+type OptimizeRequest = {
+  level: OptimizationLevel
+  from: string
+  to: string
+}
+
 type OptimizeResponse = {
+  currency: string
   level: OptimizationLevel
   totalCurrentSpend: number
   totalSavings: number
@@ -19,14 +26,14 @@ async function parseError(response: Response) {
   }
 }
 
-async function optimize(level: OptimizationLevel): Promise<OptimizationResult> {
+async function optimize({ level, from, to }: OptimizeRequest): Promise<OptimizationResult> {
   const response = await fetch(`${apiBaseUrl}/api/receipts/optimize`, {
     method: 'POST',
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ level }),
+    body: JSON.stringify({ level, from, to }),
   })
 
   if (!response.ok) {
@@ -36,6 +43,7 @@ async function optimize(level: OptimizationLevel): Promise<OptimizationResult> {
   const payload = (await response.json()) as OptimizeResponse
 
   return {
+    currency: payload.currency,
     level: payload.level,
     totalCurrentSpend: payload.totalCurrentSpend,
     totalSavings: payload.totalSavings,

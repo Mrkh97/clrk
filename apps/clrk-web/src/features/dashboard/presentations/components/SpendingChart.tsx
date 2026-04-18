@@ -11,11 +11,13 @@ import {
 import type { MonthlySpend } from '../../types'
 
 interface SpendingChartProps {
+  currency: string
   data: MonthlySpend[]
 }
 
 function CustomTooltip({ active, payload, label }: {
   active?: boolean
+  currency: string
   payload?: Array<{ value: number }>
   label?: string
 }) {
@@ -24,13 +26,13 @@ function CustomTooltip({ active, payload, label }: {
     <div className="glass-heavy rounded-lg px-3 py-2 shadow-lg">
       <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className="font-mono text-sm font-bold text-foreground">
-        ${payload[0].value.toLocaleString()}
+        {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(payload[0].value)}
       </p>
     </div>
   )
 }
 
-export default function SpendingChart({ data }: SpendingChartProps) {
+export default function SpendingChart({ currency, data }: SpendingChartProps) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -61,9 +63,12 @@ export default function SpendingChart({ data }: SpendingChartProps) {
           tick={{ fontSize: 10, fontFamily: 'Space Mono', fill: 'var(--muted-foreground)' }}
           axisLine={false}
           tickLine={false}
-          tickFormatter={(v: number) => `$${v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v}`}
+          tickFormatter={(v: number) => {
+            const amount = v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`
+            return `${currency} ${amount}`
+          }}
         />
-        <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--border)', strokeWidth: 1 }} />
+        <Tooltip content={<CustomTooltip currency={currency} />} cursor={{ stroke: 'var(--border)', strokeWidth: 1 }} />
         <Area
           type="monotone"
           dataKey="amount"

@@ -9,6 +9,8 @@
     "db:migrate": "drizzle-kit migrate",
     "seed:receipts": "tsx src/scripts/seed-receipts.ts",
     "seed:receipts:apply": "tsx src/scripts/seed-receipts.ts --apply",
+    "seed:optimizer": "tsx src/scripts/seed-optimizer-receipts.ts",
+    "seed:optimizer:apply": "tsx src/scripts/seed-optimizer-receipts.ts --apply",
     "start": "node dist/src/index.js"
   },
   "dependencies": {
@@ -20,6 +22,7 @@
     "drizzle-orm": "^0.45.2",
     "hono": "^4.12.11",
     "postgres": "^3.4.9",
+    "redis": "^5.12.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {

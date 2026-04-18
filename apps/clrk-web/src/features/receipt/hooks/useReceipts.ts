@@ -80,7 +80,7 @@ async function createReceipt(values: CreateReceiptInput): Promise<Receipt> {
     body: JSON.stringify({
       merchant: values.merchant,
       amount,
-      currency: 'USD',
+      currency: values.currency,
       date: values.date,
       category: values.category,
       paymentMethod: values.paymentMethod,
@@ -113,7 +113,7 @@ async function updateReceipt({ id, values }: { id: string; values: CreateReceipt
     body: JSON.stringify({
       merchant: values.merchant,
       amount,
-      currency: 'USD',
+      currency: values.currency,
       date: values.date,
       category: values.category,
       paymentMethod: values.paymentMethod,

@@ -1,11 +1,10 @@
-- [x] Context gathered
-- [ ] API env + scripts
-- [ ] Drizzle pg schema + migrations
-- [ ] Better Auth in Hono on `/api/auth/*`
-- [ ] Session middleware + protected helper
-- [ ] Protected image extraction endpoint
-- [ ] Web auth client
-- [ ] `/login` and `/register`
-- [ ] Protect all non-public routes
-- [ ] Hook receipt upload to API
-- [ ] Verify build + flows
+# Receipt currency + FX plan
+
+- Add `currency` to web receipt form state and submit flow.
+- Use TRY as the form default.
+- Normalize extracted currency in API extraction flow; if OCR cannot infer a valid currency, return TRY.
+- Add Frankfurter client under `apps/clrk-api/src/infrastructure/external-apis/`.
+- Normalize dashboard + optimizer calculations to TRY before totals are computed.
+- Verify with API tests and web/API builds.
+
+Open questions: none blocking; latest-rate conversion is acceptable for now.

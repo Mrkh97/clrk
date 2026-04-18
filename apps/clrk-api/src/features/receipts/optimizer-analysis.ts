@@ -1,4 +1,5 @@
 import type { ReceiptCategory } from './schema.js'
+import { ANALYTICS_CURRENCY } from './currency.js'
 
 export type OptimizerLevel = 'easy' | 'hard'
 
@@ -23,6 +24,7 @@ export type OptimizerSuggestion = {
 }
 
 export type OptimizerResponse = {
+  currency: string
   level: OptimizerLevel
   totalCurrentSpend: number
   totalSavings: number
@@ -252,6 +254,7 @@ export function createOptimizerAnalysis(
 
   if (receipts.length === 0 || totalCurrentSpend === 0) {
     return {
+      currency: ANALYTICS_CURRENCY,
       level,
       totalCurrentSpend,
       totalSavings: 0,
@@ -299,6 +302,7 @@ export function createOptimizerAnalysis(
     .map(({ priorityScore: _priorityScore, ...suggestion }) => suggestion)
 
   return {
+    currency: ANALYTICS_CURRENCY,
     level,
     totalCurrentSpend,
     totalSavings: roundMoney(suggestions.reduce((sum, item) => sum + item.saving, 0)),

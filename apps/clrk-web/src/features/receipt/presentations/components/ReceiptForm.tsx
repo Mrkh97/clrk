@@ -7,7 +7,7 @@ import { Textarea } from '#/components/ui/textarea'
 import DatePicker from '#/components/DatePicker'
 import { useAddReceipt, useReceipt, useUpdateReceipt } from '../../hooks/useReceipts'
 import { useReceiptStore } from '../../stores/useReceiptStore'
-import type { ExtractedReceipt, ReceiptCategory, ReceiptFormValues } from '../../types'
+import { COMMON_RECEIPT_CURRENCIES, type ExtractedReceipt, type ReceiptCategory, type ReceiptFormValues } from '../../types'
 
 const CATEGORIES: { value: ReceiptCategory; label: string }[] = [
   { value: 'food', label: 'Food & Dining' },
@@ -25,9 +25,21 @@ const PAYMENT_METHODS = [
   { value: 'digital', label: 'Digital' },
 ] as const
 
+const CURRENCY_LABELS: Record<string, string> = {
+  TRY: 'Turkish Lira (₺)',
+  USD: 'US Dollar ($)',
+  EUR: 'Euro (€)',
+  GBP: 'British Pound (£)',
+  CAD: 'Canadian Dollar (C$)',
+  AUD: 'Australian Dollar (A$)',
+  CHF: 'Swiss Franc (CHF)',
+  JPY: 'Japanese Yen (¥)',
+}
+
 const defaultValues: ReceiptFormValues = {
   merchant: '',
   amount: '',
+  currency: 'TRY',
   date: new Date().toISOString().split('T')[0],
   category: 'food',
   paymentMethod: 'card',
@@ -52,6 +64,7 @@ export default function ReceiptForm() {
     setValues({
       merchant: selectedReceipt.merchant,
       amount: selectedReceipt.amount.toFixed(2),
+      currency: selectedReceipt.currency,
       date: selectedReceipt.date,
       category: selectedReceipt.category,
       paymentMethod: selectedReceipt.paymentMethod,
@@ -71,6 +84,7 @@ export default function ReceiptForm() {
         extractedReceipt.total != null
           ? extractedReceipt.total.toFixed(2)
           : current.amount,
+      currency: extractedReceipt.currency || current.currency,
       date: normalizeReceiptDate(extractedReceipt.date) ?? current.date,
       paymentMethod: extractedReceipt.paymentMethod ?? current.paymentMethod,
       notes: extractedReceipt.notes ?? current.notes,
@@ -80,6 +94,12 @@ export default function ReceiptForm() {
   const set = (field: keyof ReceiptFormValues) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => setValues((prev) => ({ ...prev, [field]: e.target.value }))
+
+  const currencyOptions = values.currency && !COMMON_RECEIPT_CURRENCIES.includes(values.currency as never)
+    ? [values.currency, ...COMMON_RECEIPT_CURRENCIES]
+    : [...COMMON_RECEIPT_CURRENCIES]
+
+  const amountAdornment = getCurrencyAdornment(values.currency)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -160,14 +180,16 @@ export default function ReceiptForm() {
         />
       </div>
 
-      {/* Amount + Date */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Amount + Currency + Date */}
+      <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-1.5">
           <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             Amount
           </Label>
           <div className="relative">
-            <span className="absolute left-0 top-1/2 -translate-y-1/2 font-mono text-sm text-muted-foreground">$</span>
+            <span className="absolute left-0 top-1/2 inline-flex min-w-8 -translate-y-1/2 items-center font-mono text-xs text-muted-foreground">
+              {amountAdornment}
+            </span>
             <Input
               type="number"
               step="0.01"
@@ -176,9 +198,29 @@ export default function ReceiptForm() {
               value={values.amount}
               onChange={set('amount')}
               required
-              className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent pl-4 px-0 text-sm font-mono focus-visible:border-foreground focus-visible:ring-0"
+              className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent pr-0 pl-10 text-sm font-mono focus-visible:border-foreground focus-visible:ring-0"
             />
           </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Currency
+          </Label>
+          <Select
+            value={values.currency}
+            onValueChange={(currency) => setValues((prev) => ({ ...prev, currency }))}
+          >
+            <SelectTrigger className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 text-sm focus:border-foreground focus:ring-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {currencyOptions.map((currency) => (
+                <SelectItem key={currency} value={currency}>
+                  {CURRENCY_LABELS[currency] ?? currency}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -277,7 +319,7 @@ function normalizeReceiptDate(value?: string | null) {
   return parsed.toISOString().slice(0, 10)
 }
 
-function formatMoney(amount?: number | null, currency = 'USD') {
+function formatMoney(amount?: number | null, currency = 'TRY') {
   if (amount == null) {
     return '—'
   }
@@ -289,7 +331,7 @@ function formatMoney(amount?: number | null, currency = 'USD') {
 }
 
 function ExtractedReceiptPreview({ receipt }: { receipt: ExtractedReceipt }) {
-  const moneyCurrency = receipt.currency || 'USD'
+  const moneyCurrency = receipt.currency || 'TRY'
   const visibleItems = receipt.items.slice(0, 3)
 
   return (
@@ -360,6 +402,21 @@ function ExtractedReceiptPreview({ receipt }: { receipt: ExtractedReceipt }) {
       )}
     </div>
   )
+}
+
+function getCurrencyAdornment(currency: string) {
+  switch (currency) {
+    case 'TRY':
+      return '₺'
+    case 'USD':
+      return '$'
+    case 'EUR':
+      return '€'
+    case 'GBP':
+      return '£'
+    default:
+      return currency.slice(0, 3).toUpperCase()
+  }
 }
 
 function SummaryField({ label, value }: { label: string; value: string }) {

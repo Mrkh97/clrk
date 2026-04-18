@@ -10,6 +10,10 @@ export default function OptimizationResults() {
   if (!result) return null
 
   const pct = ((result.totalSavings / result.totalCurrentSpend) * 100).toFixed(1)
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: result.currency,
+  })
 
   return (
     <div className="space-y-6">
@@ -19,10 +23,10 @@ export default function OptimizationResults() {
           Potential Monthly Savings
         </p>
         <p className="mt-2 font-display text-3xl font-bold text-brand">
-          ${result.totalSavings.toFixed(2)}
+          {formatter.format(result.totalSavings)}
         </p>
         <p className="mt-1 font-mono text-xs text-muted-foreground">
-          {pct}% of ${result.totalCurrentSpend.toLocaleString()} monthly spend
+          {pct}% of {formatter.format(result.totalCurrentSpend)} monthly spend
         </p>
       </GlassCard>
 
@@ -33,7 +37,7 @@ export default function OptimizationResults() {
         </p>
         <div className="space-y-3">
           {result.suggestions.map((s) => (
-            <SuggestionCard key={s.id} suggestion={s} />
+            <SuggestionCard key={s.id} currency={result.currency} suggestion={s} />
           ))}
         </div>
       </div>

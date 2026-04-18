@@ -9,6 +9,8 @@ export type ReceiptCategory =
 
 export type PaymentMethod = 'cash' | 'card' | 'digital'
 
+export const COMMON_RECEIPT_CURRENCIES = ['TRY', 'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'CHF', 'JPY'] as const
+
 export type ReceiptStatus = 'pending' | 'processing' | 'complete' | 'error'
 
 export interface Receipt {
@@ -33,7 +35,7 @@ export interface ExtractedReceiptItem {
 
 export interface ExtractedReceipt {
   merchant: string | null
-  currency: string | null
+  currency: string
   date?: string | null
   subtotal?: number | null
   tax?: number | null
@@ -61,6 +63,7 @@ export interface UploadState {
 export interface ReceiptFormValues {
   merchant: string
   amount: string
+  currency: string
   date: string
   category: ReceiptCategory
   paymentMethod: PaymentMethod
