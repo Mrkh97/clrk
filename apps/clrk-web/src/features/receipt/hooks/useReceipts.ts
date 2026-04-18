@@ -1,116 +1,198 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { CreateReceiptInput, Receipt } from '../types'
+import { apiBaseUrl } from '#/lib/auth-client'
+import type { CreateReceiptInput, Receipt, ReceiptFilters } from '../types'
 
-const DUMMY_RECEIPTS: Receipt[] = [
-  {
-    id: '1',
-    merchant: 'Whole Foods Market',
-    amount: 84.5,
-    currency: 'USD',
-    date: '2026-04-03',
-    category: 'food',
-    paymentMethod: 'card',
-    notes: 'Weekly groceries',
-    status: 'complete',
-    aiExtracted: true,
-  },
-  {
-    id: '2',
-    merchant: 'Uber',
-    amount: 23.0,
-    currency: 'USD',
-    date: '2026-04-02',
-    category: 'transport',
-    paymentMethod: 'digital',
-    status: 'complete',
-    aiExtracted: true,
-  },
-  {
-    id: '3',
-    merchant: 'CVS Pharmacy',
-    amount: 42.3,
-    currency: 'USD',
-    date: '2026-04-01',
-    category: 'health',
-    paymentMethod: 'card',
-    notes: 'Prescription + vitamins',
-    status: 'pending',
-    aiExtracted: false,
-  },
-  {
-    id: '4',
-    merchant: 'Amazon',
-    amount: 156.0,
-    currency: 'USD',
-    date: '2026-03-30',
-    category: 'shopping',
-    paymentMethod: 'card',
-    status: 'complete',
-    aiExtracted: true,
-  },
-  {
-    id: '5',
-    merchant: 'PG&E',
-    amount: 120.0,
-    currency: 'USD',
-    date: '2026-03-28',
-    category: 'utilities',
-    paymentMethod: 'digital',
-    notes: 'Monthly electricity bill',
-    status: 'complete',
-    aiExtracted: false,
-  },
-  {
-    id: '6',
-    merchant: 'Chipotle',
-    amount: 18.75,
-    currency: 'USD',
-    date: '2026-03-27',
-    category: 'food',
-    paymentMethod: 'cash',
-    status: 'complete',
-    aiExtracted: true,
-  },
-]
+type ReceiptListResponse = {
+  receipts: Receipt[]
+}
 
-let receipts = [...DUMMY_RECEIPTS]
+type ReceiptResponse = {
+  receipt: Receipt
+}
 
-const fetchReceipts = (): Promise<Receipt[]> =>
-  new Promise((resolve) => setTimeout(() => resolve([...receipts]), 300))
+function buildReceiptQuery(filters: ReceiptFilters) {
+  const params = new URLSearchParams()
 
-const addReceipt = (values: CreateReceiptInput): Promise<Receipt> =>
-  new Promise((resolve) => {
-    const newReceipt: Receipt = {
-      id: String(Date.now()),
+  if (filters.from) {
+    params.set('from', filters.from)
+  }
+
+  if (filters.to) {
+    params.set('to', filters.to)
+  }
+
+  if (filters.category) {
+    params.set('category', filters.category)
+  }
+
+  const query = params.toString()
+  return query ? `?${query}` : ''
+}
+
+async function parseError(response: Response) {
+  try {
+    const payload = (await response.json()) as { error?: string; message?: string }
+    return payload.error ?? payload.message ?? 'Request failed.'
+  } catch {
+    return 'Request failed.'
+  }
+}
+
+async function fetchReceipts(filters: ReceiptFilters): Promise<Receipt[]> {
+  const response = await fetch(`${apiBaseUrl}/api/receipts${buildReceiptQuery(filters)}`, {
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    throw new Error(await parseError(response))
+  }
+
+  const payload = (await response.json()) as ReceiptListResponse
+  return payload.receipts
+}
+
+async function fetchReceipt(id: string): Promise<Receipt> {
+  const response = await fetch(`${apiBaseUrl}/api/receipts/${id}`, {
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    throw new Error(await parseError(response))
+  }
+
+  const payload = (await response.json()) as ReceiptResponse
+  return payload.receipt
+}
+
+async function createReceipt(values: CreateReceiptInput): Promise<Receipt> {
+  const amount = Number.parseFloat(values.amount)
+
+  if (!Number.isFinite(amount)) {
+    throw new Error('Amount must be a valid number.')
+  }
+
+  const response = await fetch(`${apiBaseUrl}/api/receipts`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
       merchant: values.merchant,
-      amount: parseFloat(values.amount) || 0,
+      amount,
       currency: 'USD',
       date: values.date,
       category: values.category,
       paymentMethod: values.paymentMethod,
       notes: values.notes,
-      status: 'complete',
       aiExtracted: Boolean(values.aiExtracted),
-    }
-    receipts = [newReceipt, ...receipts]
-    setTimeout(() => resolve(newReceipt), 300)
+    }),
   })
 
-export function useReceipts() {
+  if (!response.ok) {
+    throw new Error(await parseError(response))
+  }
+
+  const payload = (await response.json()) as ReceiptResponse
+  return payload.receipt
+}
+
+async function updateReceipt({ id, values }: { id: string; values: CreateReceiptInput }): Promise<Receipt> {
+  const amount = Number.parseFloat(values.amount)
+
+  if (!Number.isFinite(amount)) {
+    throw new Error('Amount must be a valid number.')
+  }
+
+  const response = await fetch(`${apiBaseUrl}/api/receipts/${id}`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      merchant: values.merchant,
+      amount,
+      currency: 'USD',
+      date: values.date,
+      category: values.category,
+      paymentMethod: values.paymentMethod,
+      notes: values.notes,
+      aiExtracted: Boolean(values.aiExtracted),
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(await parseError(response))
+  }
+
+  const payload = (await response.json()) as ReceiptResponse
+  return payload.receipt
+}
+
+async function deleteReceipt(id: string): Promise<void> {
+  const response = await fetch(`${apiBaseUrl}/api/receipts/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    throw new Error(await parseError(response))
+  }
+}
+
+export function useReceipts(filters: ReceiptFilters = {}) {
   return useQuery({
-    queryKey: ['receipts'],
-    queryFn: fetchReceipts,
-    initialData: [...receipts],
-    staleTime: Infinity,
+    queryKey: ['receipts', filters],
+    queryFn: () => fetchReceipts(filters),
+    placeholderData: (previousData) => previousData,
+  })
+}
+
+export function useReceipt(id: string | null) {
+  return useQuery({
+    queryKey: ['receipt', id],
+    queryFn: () => fetchReceipt(id!),
+    enabled: Boolean(id),
   })
 }
 
 export function useAddReceipt() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: addReceipt,
+    mutationFn: createReceipt,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['receipts'] }),
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
+      ])
+    },
+  })
+}
+
+export function useUpdateReceipt() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: updateReceipt,
+    onSuccess: async (receipt) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['receipts'] }),
+        queryClient.invalidateQueries({ queryKey: ['receipt', receipt.id] }),
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
+      ])
+    },
+  })
+}
+
+export function useDeleteReceipt() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: deleteReceipt,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['receipts'] })
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['receipts'] }),
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
+      ])
     },
   })
 }

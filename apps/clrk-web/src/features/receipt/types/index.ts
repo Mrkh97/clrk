@@ -70,3 +70,19 @@ export interface ReceiptFormValues {
 export interface CreateReceiptInput extends ReceiptFormValues {
   aiExtracted?: boolean
 }
+
+export interface ReceiptFilters {
+  from?: string
+  to?: string
+  category?: ReceiptCategory
+}
+
+export const RECEIPT_CATEGORY_LABELS: Record<ReceiptCategory, string> = {
+  food: 'Food & Dining',
+  transport: 'Transport',
+  utilities: 'Utilities',
+  entertainment: 'Entertainment',
+  health: 'Health',
+  shopping: 'Shopping',
+  other: 'Other',
+}
