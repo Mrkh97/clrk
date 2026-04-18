@@ -1,6 +1,19 @@
 import type { Transaction } from '../../types'
 import StatusBadge from '#/components/StatusBadge'
 
+function formatDateOnly(value: string) {
+  const [year, month, day] = value.split('-').map(Number)
+
+  if (!year || !month || !day) {
+    return value
+  }
+
+  return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
 interface TransactionListProps {
   transactions: Transaction[]
 }
@@ -20,10 +33,7 @@ export default function TransactionList({ transactions }: TransactionListProps) 
 
       {/* Rows */}
       {transactions.map((tx) => {
-        const formattedDate = new Date(tx.date).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-        })
+        const formattedDate = formatDateOnly(tx.date)
         return (
           <div
             key={tx.id}
