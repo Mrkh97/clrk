@@ -14,7 +14,7 @@ const optimizerReasonSchema = z.object({
   ),
 })
 
-const optimizerModels = ['gpt-5.4-mini', 'gpt-5.4'] as const
+const optimizerModel = 'gpt-5.4'
 
 function isUsableEnrichment(output: z.infer<typeof optimizerReasonSchema>, suggestionIds: Set<string>) {
   if (output.suggestions.length === 0) {
@@ -43,55 +43,51 @@ export async function enrichOptimizerSuggestions(
   })
   const suggestionIds = new Set(response.suggestions.map((suggestion) => suggestion.id))
 
-  for (const modelName of optimizerModels) {
-    try {
-      const { output } = await generateText({
-        model: openai.responses(modelName),
-        output: Output.object({ schema: optimizerReasonSchema }),
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: [
-                  'You are prioritizing spending-cut suggestions from receipt history.',
-                  'Keep every original suggestion id and return one concise reason per suggestion.',
-                  'Make each reason practical, specific, and grounded in the provided spend pattern.',
-                  'Prefer clearer prioritization, not new math. Do not change savings values.',
-                  `Current level: ${response.level}.`,
-                  `Current spend total: ${response.totalCurrentSpend}.`,
-                  `Deterministic suggestions: ${JSON.stringify(response.suggestions)}.`,
-                ].join(' '),
-              },
-            ],
-          },
-        ],
-      })
+  try {
+    const { output } = await generateText({
+      model: openai.responses(optimizerModel),
+      output: Output.object({ schema: optimizerReasonSchema }),
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: [
+                'You are prioritizing spending-cut suggestions from receipt history.',
+                'Keep every original suggestion id and return one concise reason per suggestion.',
+                'Make each reason practical, specific, and grounded in the provided spend pattern, including note context already embedded in the suggestion reasons when present.',
+                'Prefer clearer prioritization, not new math. Do not change savings values.',
+                `Current level: ${response.level}.`,
+                `Current spend total: ${response.totalCurrentSpend}.`,
+                `Deterministic suggestions: ${JSON.stringify(response.suggestions)}.`,
+              ].join(' '),
+            },
+          ],
+        },
+      ],
+    })
 
-      if (!isUsableEnrichment(output, suggestionIds)) {
-        continue
-      }
-
-      const metadata = new Map(output.suggestions.map((suggestion) => [suggestion.id, suggestion]))
-
-      return {
-        ...response,
-        suggestions: [...response.suggestions]
-          .sort((left, right) => {
-            const leftPriority = metadata.get(left.id)?.priority ?? Number.MAX_SAFE_INTEGER
-            const rightPriority = metadata.get(right.id)?.priority ?? Number.MAX_SAFE_INTEGER
-            return leftPriority - rightPriority
-          })
-          .map((suggestion) => ({
-            ...suggestion,
-            reason: metadata.get(suggestion.id)?.reason.trim() || suggestion.reason,
-          })),
-      }
-    } catch {
-      continue
+    if (!isUsableEnrichment(output, suggestionIds)) {
+      return response
     }
-  }
 
-  return response
+    const metadata = new Map(output.suggestions.map((suggestion) => [suggestion.id, suggestion]))
+
+    return {
+      ...response,
+      suggestions: [...response.suggestions]
+        .sort((left, right) => {
+          const leftPriority = metadata.get(left.id)?.priority ?? Number.MAX_SAFE_INTEGER
+          const rightPriority = metadata.get(right.id)?.priority ?? Number.MAX_SAFE_INTEGER
+          return leftPriority - rightPriority
+        })
+        .map((suggestion) => ({
+          ...suggestion,
+          reason: metadata.get(suggestion.id)?.reason.trim() || suggestion.reason,
+        })),
+    }
+  } catch {
+    return response
+  }
 }

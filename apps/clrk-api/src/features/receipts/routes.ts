@@ -408,6 +408,7 @@ export function registerReceiptRoutes(app: Hono<{ Variables: AppVariables }>) {
         category: receipt.category,
         paymentMethod: receipt.paymentMethod,
         date: receipt.date,
+        notes: receipt.notes,
       })
       .from(receipt)
       .where(and(eq(receipt.userId, userId), eq(receipt.status, 'complete')))
@@ -448,13 +449,14 @@ export function registerReceiptRoutes(app: Hono<{ Variables: AppVariables }>) {
 
       const imageBase64 = Buffer.from(await file.arrayBuffer()).toString('base64')
       const imageDataUrl = `data:${file.type};base64,${imageBase64}`
+      const receiptExtractionModel = 'gpt-5.4-nano'
       const openai = createOpenAI({
         baseURL: 'https://openrouter.ai/api/v1',
         apiKey: env.OPENAI_API_KEY,
       })
 
       const { output } = await generateText({
-        model: openai.responses(env.OPENAI_MODEL),
+        model: openai.responses(receiptExtractionModel),
         output: Output.object({
           schema: extractedReceiptSchema,
         }),
@@ -467,7 +469,8 @@ export function registerReceiptRoutes(app: Hono<{ Variables: AppVariables }>) {
                 text: [
                   'You are extracting structured receipt data from a single image.',
                   'Return only the schema fields requested.',
-                  'Infer pricing details, merchant, purchase date, payment method, line items, notes, and raw text when visible.',
+                  'Infer pricing details, merchant, purchase date, payment method, line items, raw text, and a short spending summary.',
+                  'Set `notes` to a concise 1-2 sentence summary describing what was purchased, how the money was spent, and any payment context that would help future budget optimization.',
                   'Use null when a value is not visible. Keep confidence between 0 and 1.',
                 ].join(' '),
               },

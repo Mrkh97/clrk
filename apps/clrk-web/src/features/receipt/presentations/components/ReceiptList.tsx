@@ -1,6 +1,15 @@
 import { useMemo, useState } from 'react'
+import DatePicker from '#/components/DatePicker'
 import { Button } from '#/components/ui/button'
-import { Input } from '#/components/ui/input'
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '#/components/ui/alert-dialog'
 import {
   Select,
   SelectContent,
@@ -10,13 +19,62 @@ import {
 } from '#/components/ui/select'
 import { useDeleteReceipt, useReceipts } from '../../hooks/useReceipts'
 import { useReceiptStore } from '../../stores/useReceiptStore'
-import { RECEIPT_CATEGORY_LABELS, type ReceiptCategory } from '../../types'
+import { RECEIPT_CATEGORY_LABELS, type Receipt, type ReceiptCategory } from '../../types'
 import ReceiptCard from './ReceiptCard'
+
+function ReceiptFiltersBar({
+  from,
+  to,
+  category,
+  onFromChange,
+  onToChange,
+  onCategoryChange,
+}: {
+  from: string
+  to: string
+  category: 'all' | ReceiptCategory
+  onFromChange: (value: string) => void
+  onToChange: (value: string) => void
+  onCategoryChange: (value: 'all' | ReceiptCategory) => void
+}) {
+  return (
+    <div className="grid gap-2 rounded-xl border border-border/70 bg-background/30 p-3 sm:grid-cols-3">
+      <DatePicker
+        value={from}
+        onChange={onFromChange}
+        placeholder="From date"
+        clearable
+        className="h-9 rounded-md border border-input bg-background px-3 text-left text-xs font-medium hover:bg-background"
+      />
+      <DatePicker
+        value={to}
+        onChange={onToChange}
+        placeholder="To date"
+        clearable
+        className="h-9 rounded-md border border-input bg-background px-3 text-left text-xs font-medium hover:bg-background"
+      />
+      <Select value={category} onValueChange={(value) => onCategoryChange(value as 'all' | ReceiptCategory)}>
+        <SelectTrigger className="font-mono text-xs uppercase tracking-wider">
+          <SelectValue placeholder="Category" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All categories</SelectItem>
+          {Object.entries(RECEIPT_CATEGORY_LABELS).map(([value, label]) => (
+            <SelectItem key={value} value={value}>
+              {label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+}
 
 export default function ReceiptList() {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [category, setCategory] = useState<'all' | ReceiptCategory>('all')
+  const [pendingDeleteReceipt, setPendingDeleteReceipt] = useState<Receipt | null>(null)
   const { selectedReceiptId, selectReceipt } = useReceiptStore()
   const { mutate: deleteReceipt, isPending: isDeleting } = useDeleteReceipt()
   const filters = useMemo(
@@ -60,35 +118,14 @@ export default function ReceiptList() {
             Clear filters
           </Button>
         </div>
-        <div className="grid gap-2 rounded-xl border border-border/70 bg-background/30 p-3 sm:grid-cols-3">
-          <Input
-            type="date"
-            value={from}
-            onChange={(event) => setFrom(event.target.value)}
-            className="font-mono text-xs"
-            aria-label="Filter receipts from date"
-          />
-          <Input
-            type="date"
-            value={to}
-            onChange={(event) => setTo(event.target.value)}
-            className="font-mono text-xs"
-            aria-label="Filter receipts to date"
-          />
-          <Select value={category} onValueChange={(value) => setCategory(value as 'all' | ReceiptCategory)}>
-            <SelectTrigger className="font-mono text-xs uppercase tracking-wider">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All categories</SelectItem>
-              {Object.entries(RECEIPT_CATEGORY_LABELS).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <ReceiptFiltersBar
+          from={from}
+          to={to}
+          category={category}
+          onFromChange={setFrom}
+          onToChange={setTo}
+          onCategoryChange={setCategory}
+        />
         <div className="glass-card flex flex-col items-center justify-center border border-dashed py-16 text-center">
           <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
             No receipts found
@@ -121,35 +158,14 @@ export default function ReceiptList() {
           Clear filters
         </Button>
       </div>
-      <div className="grid gap-2 rounded-xl border border-border/70 bg-background/30 p-3 sm:grid-cols-3">
-        <Input
-          type="date"
-          value={from}
-          onChange={(event) => setFrom(event.target.value)}
-          className="font-mono text-xs"
-          aria-label="Filter receipts from date"
-        />
-        <Input
-          type="date"
-          value={to}
-          onChange={(event) => setTo(event.target.value)}
-          className="font-mono text-xs"
-          aria-label="Filter receipts to date"
-        />
-        <Select value={category} onValueChange={(value) => setCategory(value as 'all' | ReceiptCategory)}>
-          <SelectTrigger className="font-mono text-xs uppercase tracking-wider">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All categories</SelectItem>
-            {Object.entries(RECEIPT_CATEGORY_LABELS).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <ReceiptFiltersBar
+        from={from}
+        to={to}
+        category={category}
+        onFromChange={setFrom}
+        onToChange={setTo}
+        onCategoryChange={setCategory}
+      />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {receipts.map((receipt) => (
           <ReceiptCard
@@ -157,19 +173,47 @@ export default function ReceiptList() {
             receipt={receipt}
             selected={selectedReceiptId === receipt.id}
             onClick={() => selectReceipt(receipt.id)}
-            onDelete={() => {
-              deleteReceipt(receipt.id, {
-                onSuccess: () => {
-                  if (selectedReceiptId === receipt.id) {
-                    selectReceipt(null)
-                  }
-                },
-              })
-            }}
+            onDelete={() => setPendingDeleteReceipt(receipt)}
             isDeleting={isDeleting}
           />
         ))}
       </div>
+      <AlertDialog open={Boolean(pendingDeleteReceipt)} onOpenChange={(open) => !open && setPendingDeleteReceipt(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete receipt?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingDeleteReceipt
+                ? `This will permanently remove ${pendingDeleteReceipt.merchant} from your receipts.`
+                : 'This action cannot be undone.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isDeleting || !pendingDeleteReceipt}
+              onClick={() => {
+                if (!pendingDeleteReceipt) {
+                  return
+                }
+
+                deleteReceipt(pendingDeleteReceipt.id, {
+                  onSuccess: () => {
+                    if (selectedReceiptId === pendingDeleteReceipt.id) {
+                      selectReceipt(null)
+                    }
+                    setPendingDeleteReceipt(null)
+                  },
+                })
+              }}
+            >
+              {isDeleting ? 'Deleting…' : 'Delete receipt'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

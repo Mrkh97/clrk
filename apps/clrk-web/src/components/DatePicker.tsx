@@ -15,6 +15,7 @@ interface DatePickerProps {
   onChange: (value: string) => void
   placeholder?: string
   className?: string
+  clearable?: boolean
 }
 
 export default function DatePicker({
@@ -22,6 +23,7 @@ export default function DatePicker({
   onChange,
   placeholder = 'Pick a date',
   className,
+  clearable = false,
 }: DatePickerProps) {
   const date = value ? parse(value, 'yyyy-MM-dd', new Date()) : undefined
 
@@ -29,6 +31,7 @@ export default function DatePicker({
     <Popover>
       <PopoverTrigger asChild>
         <Button
+          type="button"
           variant="outline"
           className={cn(
             'w-full justify-start border-x-0 border-t-0 rounded-none border-b border-border bg-transparent px-0 text-sm font-normal hover:bg-transparent focus-visible:ring-0 focus-visible:border-foreground',
@@ -41,14 +44,27 @@ export default function DatePicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={(d) => {
-            if (d) onChange(format(d, 'yyyy-MM-dd'))
-          }}
-          initialFocus
-        />
+        <div className="space-y-2 p-2">
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={(d) => {
+              if (d) onChange(format(d, 'yyyy-MM-dd'))
+            }}
+            initialFocus
+          />
+          {clearable && value ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="w-full justify-center font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
+              onClick={() => onChange('')}
+            >
+              Clear date
+            </Button>
+          ) : null}
+        </div>
       </PopoverContent>
     </Popover>
   )

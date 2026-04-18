@@ -9,6 +9,7 @@ export type ReceiptOptimizerInput = {
   category: string
   paymentMethod: string
   date: Date
+  notes?: string | null
 }
 
 export type OptimizerSuggestion = {
@@ -37,6 +38,7 @@ type MerchantGroup = {
   averageSpend: number
   recurrenceDays: number | null
   paymentMethods: string[]
+  noteSummary: string | null
 }
 
 const levelTargets: Record<OptimizerLevel, number> = {
@@ -120,18 +122,41 @@ function getRecurrenceDays(sortedDates: Date[]) {
   return Math.round(intervals.reduce((sum, value) => sum + value, 0) / intervals.length)
 }
 
+function normalizeNote(value: string | null | undefined) {
+  if (!value) {
+    return null
+  }
+
+  const normalized = value.trim().replace(/\s+/g, ' ')
+  return normalized.length > 0 ? normalized : null
+}
+
+function summarizeNotes(noteSet: Set<string>) {
+  const notes = Array.from(noteSet.values())
+
+  if (notes.length === 0) {
+    return null
+  }
+
+  return notes.slice(0, 2).join(' ')
+}
+
 function groupReceipts(receipts: ReceiptOptimizerInput[]) {
-  const grouped = new Map<string, MerchantGroup & { dates: Date[]; paymentMethodSet: Set<string> }>()
+  const grouped = new Map<string, MerchantGroup & { dates: Date[]; paymentMethodSet: Set<string>; noteSet: Set<string> }>()
 
   for (const item of receipts) {
     const key = `${item.category}::${item.merchant.trim().toLowerCase()}`
     const existing = grouped.get(key)
+    const normalizedNote = normalizeNote(item.notes)
 
     if (existing) {
       existing.currentSpend += item.amount
       existing.transactionCount += 1
       existing.dates.push(item.date)
       existing.paymentMethodSet.add(item.paymentMethod)
+      if (normalizedNote) {
+        existing.noteSet.add(normalizedNote)
+      }
       continue
     }
 
@@ -144,8 +169,10 @@ function groupReceipts(receipts: ReceiptOptimizerInput[]) {
       averageSpend: item.amount,
       recurrenceDays: null,
       paymentMethods: [],
+      noteSummary: null,
       dates: [item.date],
       paymentMethodSet: new Set([item.paymentMethod]),
+      noteSet: new Set(normalizedNote ? [normalizedNote] : []),
     })
   }
 
@@ -161,19 +188,29 @@ function groupReceipts(receipts: ReceiptOptimizerInput[]) {
       averageSpend: roundMoney(group.currentSpend / group.transactionCount),
       recurrenceDays: getRecurrenceDays(sortedDates),
       paymentMethods: Array.from(group.paymentMethodSet.values()),
+      noteSummary: summarizeNotes(group.noteSet),
     }
   })
 }
 
-function getMerchantSignal(merchant: string) {
+function getMerchantSignal(merchant: string, noteSummary: string | null) {
   const normalizedMerchant = merchant.trim().toLowerCase()
+  const normalizedNotes = noteSummary?.toLowerCase() ?? ''
 
   if (discretionaryKeywords.some((keyword) => normalizedMerchant.includes(keyword))) {
     return 1.2
   }
 
+  if (/subscription|takeout|delivery|impulse|streaming|coffee|snacks|rides/.test(normalizedNotes)) {
+    return 1.15
+  }
+
   if (essentialKeywords.some((keyword) => normalizedMerchant.includes(keyword))) {
     return 0.45
+  }
+
+  if (/bill|prescription|pharmacy|grocery staples|fuel refill|phone plan/.test(normalizedNotes)) {
+    return 0.55
   }
 
   return 1
@@ -182,28 +219,29 @@ function getMerchantSignal(merchant: string) {
 function buildFallbackReason(group: MerchantGroup, level: OptimizerLevel) {
   const recurring = group.recurrenceDays !== null && group.recurrenceDays >= 20 && group.recurrenceDays <= 40
   const levelText = level === 'hard' ? 'a harder reset' : 'an easy trim'
+  const noteContext = group.noteSummary ? ` Notes describe it as: ${group.noteSummary}` : ''
 
   if (recurring && group.category === 'entertainment') {
-    return `${group.merchant} looks like a recurring entertainment charge, so ${levelText} can usually come from pausing, downgrading, or sharing this subscription.`
+    return `${group.merchant} looks like a recurring entertainment charge, so ${levelText} can usually come from pausing, downgrading, or sharing this subscription.${noteContext}`
   }
 
   if (group.category === 'food' && group.transactionCount >= 4) {
-    return `${group.merchant} shows up frequently in food spending, so shifting a few orders to groceries or meal prep is a believable way to save here.`
+    return `${group.merchant} shows up frequently in food spending, so shifting a few orders to groceries or meal prep is a believable way to save here.${noteContext}`
   }
 
   if (group.category === 'shopping') {
-    return `${group.merchant} is driving repeat shopping spend, which makes it a practical place to cap impulse purchases before cutting essential bills.`
+    return `${group.merchant} is driving repeat shopping spend, which makes it a practical place to cap impulse purchases before cutting essential bills.${noteContext}`
   }
 
   if (group.category === 'other') {
-    return `${group.merchant} sits in a flexible spending bucket, making it a good candidate for ${levelText} without changing fixed commitments.`
+    return `${group.merchant} sits in a flexible spending bucket, making it a good candidate for ${levelText} without changing fixed commitments.${noteContext}`
   }
 
   if (group.category === 'transport') {
-    return `${group.merchant} is meaningful transport spend, and modest trip consolidation can usually reduce this without fully removing it.`
+    return `${group.merchant} is meaningful transport spend, and modest trip consolidation can usually reduce this without fully removing it.${noteContext}`
   }
 
-  return `${group.merchant} is one of the larger receipt patterns in this category, so a targeted reduction here creates savings faster than spreading cuts everywhere.`
+   return `${group.merchant} is one of the larger receipt patterns in this category, so a targeted reduction here creates savings faster than spreading cuts everywhere.${noteContext}`
 }
 
 export function createOptimizerAnalysis(
@@ -235,7 +273,7 @@ export function createOptimizerAnalysis(
         : group.transactionCount >= 4
           ? 1.08
           : 0.92
-      const merchantSignal = getMerchantSignal(group.merchant)
+      const merchantSignal = getMerchantSignal(group.merchant, group.noteSummary)
       const rawCutRatio = targetRatio * categoryMultiplier * recurrenceMultiplier * merchantSignal
       const cutRatio = clamp(rawCutRatio, targetRatio * 0.35, maxCutRatio)
       const saving = roundMoney(group.currentSpend * cutRatio)
