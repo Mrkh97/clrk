@@ -6,10 +6,13 @@ import { db } from '../../db/index.js'
 import { receipt } from '../../db/schema.js'
 import type { AppVariables } from '../authentication/index.js'
 import { env } from '../../lib/env.js'
+import { createOptimizerAnalysis } from './optimizer-analysis.js'
+import { enrichOptimizerSuggestions } from './optimizer-llm.js'
 import {
   createReceiptSchema,
   dashboardQuerySchema,
   extractedReceiptSchema,
+  optimizerRequestSchema,
   receiptQuerySchema,
   updateReceiptSchema,
   type DashboardTimeFilter,
@@ -381,6 +384,39 @@ export function registerReceiptRoutes(app: Hono<{ Variables: AppVariables }>) {
       .orderBy(desc(receipt.date), desc(receipt.createdAt))
 
     return c.json(buildDashboard(receipts, parsed.data.timeFilter))
+  })
+
+  app.post('/api/receipts/optimize', async (c) => {
+    const userId = getAuthenticatedUserId(c)
+
+    if (!userId) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const body = await c.req.json().catch(() => null)
+    const parsed = optimizerRequestSchema.safeParse(body)
+
+    if (!parsed.success) {
+      return c.json({ error: parsed.error.issues[0]?.message ?? 'Invalid optimizer payload.' }, 400)
+    }
+
+    const receipts = await db
+      .select({
+        id: receipt.id,
+        merchant: receipt.merchant,
+        amount: receipt.amount,
+        category: receipt.category,
+        paymentMethod: receipt.paymentMethod,
+        date: receipt.date,
+      })
+      .from(receipt)
+      .where(and(eq(receipt.userId, userId), eq(receipt.status, 'complete')))
+      .orderBy(desc(receipt.date), desc(receipt.createdAt))
+
+    const deterministicResponse = createOptimizerAnalysis(receipts, parsed.data.level)
+    const optimizedResponse = await enrichOptimizerSuggestions(deterministicResponse)
+
+    return c.json(optimizedResponse)
   })
 
   app.post('/api/receipts/extract', async (c) => {

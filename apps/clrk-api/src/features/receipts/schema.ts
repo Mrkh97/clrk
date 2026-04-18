@@ -75,6 +75,12 @@ export const dashboardQuerySchema = z.object({
   timeFilter: dashboardTimeFilterSchema,
 })
 
+export const optimizerLevelSchema = z.enum(['easy', 'hard'])
+
+export const optimizerRequestSchema = z.object({
+  level: optimizerLevelSchema,
+})
+
 export const extractedReceiptSchema = z.object({
   merchant: z.string().nullable(),
   currency: z.string().nullable(),
@@ -102,3 +108,4 @@ export type ReceiptCategory = z.infer<typeof receiptCategorySchema>
 export type DashboardTimeFilter = z.infer<typeof dashboardTimeFilterSchema>
 export type CreateReceipt = z.infer<typeof createReceiptSchema>
 export type UpdateReceipt = z.infer<typeof updateReceiptSchema>
+export type OptimizerLevel = z.infer<typeof optimizerLevelSchema>
