@@ -1,11 +1,9 @@
-- [x] Context gathered
-- [ ] API env + scripts
-- [ ] Drizzle pg schema + migrations
-- [ ] Better Auth in Hono on `/api/auth/*`
-- [ ] Session middleware + protected helper
-- [ ] Protected image extraction endpoint
-- [ ] Web auth client
-- [ ] `/login` and `/register`
-- [ ] Protect all non-public routes
-- [ ] Hook receipt upload to API
-- [ ] Verify build + flows
+- [x] Context gathered: current mobile scaffold + Forui setup
+- [ ] Add Forui + Riverpod codegen dependencies
+- [ ] Reshape shared into `routing`, `utils`, `extensions`, `components`
+- [ ] Split receipt domains into one-file-per-type under `domains`
+- [ ] Rename data layer to `remote_receipts_repository` with `listReceipts`/`getReceipt`
+- [ ] Split receipt state into `usecases` with `*_provider` and `*_notifier` files
+- [ ] Move feature UI into `presentation/components` and reduce `useEffect` usage
+- [ ] Rebuild shared and receipt UI on top of Forui base components
+- [ ] Verify with `flutter analyze`, `flutter test`, and `flutter build apk --debug`
