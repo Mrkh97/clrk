@@ -5,7 +5,12 @@ import AuthShell from '#/components/AuthShell'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
-import { getSafeRedirectTarget, signUp } from '#/lib/auth-client'
+import {
+  getConfirmEmailCallbackURL,
+  getConfirmEmailRedirectTarget,
+  getSafeRedirectTarget,
+  signUp,
+} from '#/lib/auth-client'
 import { getCurrentSession } from '#/lib/session'
 
 const authSearchSchema = z.object({
@@ -18,6 +23,13 @@ export const Route = createFileRoute('/register')({
     const session = await getCurrentSession()
 
     if (session) {
+      if (!session.user.emailVerified) {
+        throw redirect({
+          href: getConfirmEmailRedirectTarget(search.redirect),
+          replace: true,
+        })
+      }
+
       throw redirect({
         to: getSafeRedirectTarget(search.redirect),
         replace: true,
@@ -49,6 +61,7 @@ function RegisterPage() {
       name,
       email,
       password,
+      callbackURL: getConfirmEmailCallbackURL(redirectTarget),
     })
 
     if (error) {
@@ -57,7 +70,7 @@ function RegisterPage() {
       return
     }
 
-    window.location.assign(redirectTarget)
+    window.location.assign(getConfirmEmailRedirectTarget(redirectTarget))
   }
 
   return (

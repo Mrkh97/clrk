@@ -46,12 +46,37 @@ type RawSession = typeof authClient.$Infer.Session
 export type AuthUser = RawSession['user']
 export type AuthSession = RawSession
 
+export const defaultRedirectTarget = '/dashboard'
+export const confirmEmailPath = '/confirm-email'
+
 export function getSafeRedirectTarget(redirect?: string) {
   if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
     return redirect
   }
 
-  return '/dashboard'
+  return defaultRedirectTarget
+}
+
+export function getConfirmEmailRedirectTarget(redirect?: string) {
+  const safeRedirect = getSafeRedirectTarget(redirect)
+
+  if (safeRedirect === defaultRedirectTarget) {
+    return confirmEmailPath
+  }
+
+  const searchParams = new URLSearchParams({ redirect: safeRedirect })
+
+  return `${confirmEmailPath}?${searchParams.toString()}`
+}
+
+export function getConfirmEmailCallbackURL(redirect?: string) {
+  const target = getConfirmEmailRedirectTarget(redirect)
+
+  if (typeof window === 'undefined') {
+    return target
+  }
+
+  return new URL(target, window.location.origin).toString()
 }
 
 function normalizeSession(session: RawSession | null | undefined): AuthSession | null {

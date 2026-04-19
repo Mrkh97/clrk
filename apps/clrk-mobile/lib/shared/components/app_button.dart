@@ -1,5 +1,7 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+
+import '../theme/app_theme.dart';
 
 class AppButton extends StatelessWidget {
   const AppButton({
@@ -28,6 +30,26 @@ class AppButton extends StatelessWidget {
       ],
     );
 
-    return FButton(variant: variant, onPress: onPress, child: content);
+    final buttonStyle = switch (variant) {
+      FButtonVariant.outline => OutlinedButton.styleFrom(
+        minimumSize: Size.fromHeight(expand ? 52 : 44),
+        side: const BorderSide(color: AppColors.borderStrong),
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppColors.foreground,
+      ),
+      _ => ElevatedButton.styleFrom(
+        minimumSize: Size.fromHeight(expand ? 52 : 44),
+        backgroundColor: AppColors.brand,
+        foregroundColor: const Color(0xFF14100D),
+      ),
+    };
+
+    final child = expand ? SizedBox(width: double.infinity, child: content) : content;
+
+    if (variant == FButtonVariant.outline) {
+      return OutlinedButton(onPressed: onPress, style: buttonStyle, child: child);
+    }
+
+    return ElevatedButton(onPressed: onPress, style: buttonStyle, child: child);
   }
 }

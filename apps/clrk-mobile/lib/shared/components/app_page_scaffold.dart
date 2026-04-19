@@ -1,5 +1,6 @@
-import 'package:flutter/widgets.dart';
-import 'package:forui/forui.dart';
+import 'package:flutter/material.dart';
+
+import '../theme/app_theme.dart';
 
 class AppPageScaffold extends StatelessWidget {
   const AppPageScaffold({
@@ -18,11 +19,14 @@ class AppPageScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final actions = this.actions;
+    final theme = Theme.of(context);
 
-    return SafeArea(
-      child: FScaffold(
-        header: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+    return DecoratedBox(
+      decoration: BoxDecoration(gradient: AppTheme.backgroundGradient()),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -33,24 +37,27 @@ class AppPageScaffold extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(title, style: context.theme.typography.xl),
-                        const SizedBox(height: 6),
+                        Text('WORKSPACE', style: AppTheme.monoLabel(context)),
+                        const SizedBox(height: 10),
+                        Text(title, style: theme.textTheme.headlineLarge),
+                        const SizedBox(height: 8),
                         Text(
                           subtitle,
-                          style: context.theme.typography.sm.copyWith(
-                            color: context.theme.colors.mutedForeground,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: AppColors.mutedForeground,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  actions ?? const SizedBox.shrink(),
+                  ?actions,
                 ],
               ),
+              const SizedBox(height: 20),
+              Expanded(child: child),
             ],
           ),
         ),
-        child: child,
       ),
     );
   }

@@ -1,7 +1,7 @@
 import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeader } from '@tanstack/react-start/server'
-import { authClient } from './auth-client'
+import { authClient, getConfirmEmailRedirectTarget } from './auth-client'
 
 export const getCurrentSession = createServerFn({ method: 'GET' }).handler(async () => {
   const cookie = getRequestHeader('cookie')
@@ -26,6 +26,19 @@ export async function requireSession(redirectTarget: string) {
     throw redirect({
       to: '/login',
       search: { redirect: redirectTarget },
+      replace: true,
+    })
+  }
+
+  return session
+}
+
+export async function requireVerifiedSession(redirectTarget: string) {
+  const session = await requireSession(redirectTarget)
+
+  if (!session.user.emailVerified) {
+    throw redirect({
+      href: getConfirmEmailRedirectTarget(redirectTarget),
       replace: true,
     })
   }

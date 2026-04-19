@@ -5,7 +5,13 @@ import AuthShell from '#/components/AuthShell'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
-import { getSafeRedirectTarget, signIn } from '#/lib/auth-client'
+import {
+  authClient,
+  getConfirmEmailCallbackURL,
+  getConfirmEmailRedirectTarget,
+  getSafeRedirectTarget,
+  signIn,
+} from '#/lib/auth-client'
 import { getCurrentSession } from '#/lib/session'
 
 const authSearchSchema = z.object({
@@ -18,6 +24,13 @@ export const Route = createFileRoute('/login')({
     const session = await getCurrentSession()
 
     if (session) {
+      if (!session.user.emailVerified) {
+        throw redirect({
+          href: getConfirmEmailRedirectTarget(search.redirect),
+          replace: true,
+        })
+      }
+
       throw redirect({
         to: getSafeRedirectTarget(search.redirect),
         replace: true,
@@ -52,6 +65,25 @@ function LoginPage() {
     if (error) {
       setErrorMessage(error.message ?? 'Unable to sign in. Please check your credentials.')
       setIsSubmitting(false)
+      return
+    }
+
+    const { data: session } = await authClient.getSession()
+
+    if (session && !session.user.emailVerified) {
+      const resendResult = await authClient.sendVerificationEmail({
+        email: session.user.email,
+        callbackURL: getConfirmEmailCallbackURL(redirectTarget),
+      })
+      const confirmEmailUrl = new URL(getConfirmEmailRedirectTarget(redirectTarget), window.location.origin)
+
+      if (resendResult.error) {
+        confirmEmailUrl.searchParams.set('error', 'resend_failed')
+      } else {
+        confirmEmailUrl.searchParams.set('resent', '1')
+      }
+
+      window.location.assign(`${confirmEmailUrl.pathname}${confirmEmailUrl.search}`)
       return
     }
 

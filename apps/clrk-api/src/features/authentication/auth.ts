@@ -3,6 +3,7 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { db } from '../../db/index.js'
 import * as schema from '../../db/schema.js'
 import { env, getTrustedOrigins } from '../../lib/env.js'
+import { sendVerificationEmail } from './email.js'
 
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
@@ -17,6 +18,17 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendVerificationEmail({
+        email: user.email,
+        name: user.name,
+        verificationUrl: url,
+      })
+    },
   },
   user: {
     additionalFields: {

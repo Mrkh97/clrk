@@ -1,5 +1,6 @@
-import 'package:flutter/widgets.dart';
-import 'package:forui/forui.dart';
+import 'package:flutter/material.dart';
+
+import '../theme/app_theme.dart';
 
 class AppSectionCard extends StatelessWidget {
   const AppSectionCard({
@@ -15,19 +16,22 @@ class AppSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FCard.raw(
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: AppTheme.glassPanel(),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: context.theme.typography.lg),
+            Text(title, style: theme.textTheme.titleLarge),
             if (subtitle != null) ...[
               const SizedBox(height: 6),
               Text(
                 subtitle!,
-                style: context.theme.typography.sm.copyWith(
-                  color: context.theme.colors.mutedForeground,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.mutedForeground,
                 ),
               ),
             ],

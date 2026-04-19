@@ -1,10 +1,10 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 import AppSidebar from '#/components/AppSidebar'
-import { requireSession } from '#/lib/session'
+import { requireVerifiedSession } from '#/lib/session'
 
 export const Route = createFileRoute('/_app')({
   beforeLoad: async ({ location }) => {
-    await requireSession(location.href)
+    await requireVerifiedSession(location.href)
   },
   component: AppLayout,
 })

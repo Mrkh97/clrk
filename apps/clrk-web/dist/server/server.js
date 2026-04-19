@@ -3051,7 +3051,7 @@ var defaultSerovalPlugins = [
   p
 ];
 async function getStartManifest(matchedRoutes) {
-  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-xVzKNamX.js");
+  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-RcbfMT7V.js");
   const startManifest = tsrStartManifest();
   const rootRoute = startManifest.routes[rootRouteId] = startManifest.routes[rootRouteId] || {};
   rootRoute.assets = rootRoute.assets || [];
@@ -3077,7 +3077,7 @@ async function getStartManifest(matchedRoutes) {
 }
 const manifest = { "b983bfcc8bd1883d3c91d8ac2c59df1a03fd9106d8f9eb9411faae1b49a54339": {
   functionName: "getCurrentSession_createServerFn_handler",
-  importer: () => import("./assets/session-CJ4BdeTe.js")
+  importer: () => import("./assets/session-C-JrvYp-.js")
 } };
 async function getServerFnById(id) {
   const serverFnInfo = manifest[id];
@@ -4129,7 +4129,7 @@ var entriesPromise;
 var baseManifestPromise;
 var cachedFinalManifestPromise;
 async function loadEntries() {
-  const routerEntry = await import("./assets/router-j3DdKqaa.js").then((n2) => n2.r);
+  const routerEntry = await import("./assets/router-IiONQo8h.js").then((n2) => n2.r);
   return {
     startEntry: await import("./assets/start-HYkvq4Ni.js"),
     routerEntry

@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:forui/forui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import 'features/auth/usecases/auth_controller.dart';
 import 'shared/routing/app_router_provider.dart';
+import 'shared/theme/app_theme.dart';
 
-void main() {
-  runApp(const ProviderScope(child: ClrkMobileApp()));
+Future<void> main() async {
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  final container = ProviderContainer();
+
+  try {
+    await container.read(authControllerProvider.future);
+  } catch (_) {
+    // Let the app continue into normal routing/auth handling.
+  }
+
+  runApp(UncontrolledProviderScope(container: container, child: const ClrkMobileApp()));
+  FlutterNativeSplash.remove();
 }
 
 class ClrkMobileApp extends ConsumerWidget {
@@ -15,13 +30,14 @@ class ClrkMobileApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
-    final theme = FThemes.neutral.light.touch;
+    final foruiTheme = FThemes.neutral.dark.touch;
+    final materialTheme = AppTheme.dark();
 
     return MaterialApp.router(
       title: 'Clrk Mobile',
       debugShowCheckedModeBanner: false,
       routerConfig: router,
-      theme: theme.toApproximateMaterialTheme(),
+      theme: materialTheme,
       supportedLocales: FLocalizations.supportedLocales,
       localizationsDelegates: const [
         ...FLocalizations.localizationsDelegates,
@@ -30,7 +46,7 @@ class ClrkMobileApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       builder: (_, child) => FTheme(
-        data: theme,
+        data: foruiTheme,
         child: FToaster(
           child: FTooltipGroup(child: child ?? const SizedBox.shrink()),
         ),
