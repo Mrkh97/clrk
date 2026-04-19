@@ -1,9 +1,10 @@
-- [x] Context gathered: current mobile scaffold + Forui setup
-- [ ] Add Forui + Riverpod codegen dependencies
-- [ ] Reshape shared into `routing`, `utils`, `extensions`, `components`
-- [ ] Split receipt domains into one-file-per-type under `domains`
-- [ ] Rename data layer to `remote_receipts_repository` with `listReceipts`/`getReceipt`
-- [ ] Split receipt state into `usecases` with `*_provider` and `*_notifier` files
-- [ ] Move feature UI into `presentation/components` and reduce `useEffect` usage
-- [ ] Rebuild shared and receipt UI on top of Forui base components
-- [ ] Verify with `flutter analyze`, `flutter test`, and `flutter build apk --debug`
+# Receipt currency + FX plan
+
+- Add `currency` to web receipt form state and submit flow.
+- Use TRY as the form default.
+- Normalize extracted currency in API extraction flow; if OCR cannot infer a valid currency, return TRY.
+- Add Frankfurter client under `apps/clrk-api/src/infrastructure/external-apis/`.
+- Normalize dashboard + optimizer calculations to TRY before totals are computed.
+- Verify with API tests and web/API builds.
+
+Open questions: none blocking; latest-rate conversion is acceptable for now.

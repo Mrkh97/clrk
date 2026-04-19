@@ -7,6 +7,8 @@ import { receipt } from '../../db/schema.js'
 import type { AppVariables } from '../authentication/index.js'
 import { env } from '../../lib/env.js'
 import { createOptimizerAnalysis } from './optimizer-analysis.js'
+import { ANALYTICS_CURRENCY, DEFAULT_RECEIPT_CURRENCY, resolveReceiptCurrency } from './currency.js'
+import { normalizeMoneyRecordsToCurrency } from './exchange-rates.js'
 import { enrichOptimizerSuggestions } from './optimizer-llm.js'
 import {
   createReceiptSchema,
@@ -130,16 +132,20 @@ function buildMonthlyBuckets(startDate: Date, endDate: Date) {
   return buckets
 }
 
-function buildDashboard(receipts: ReceiptRecord[], timeFilter: DashboardTimeFilter) {
+function buildDashboard(
+  receipts: ReceiptRecord[],
+  timeFilter: DashboardTimeFilter,
+  normalizedReceipts: ReceiptRecord[] = receipts,
+) {
   const now = new Date()
   const startDate = getDashboardStartDate(timeFilter, now)
   const daySpan = getDashboardDaySpan(timeFilter, startDate, now)
-  const totalSpent = receipts.reduce((sum, item) => sum + item.amount, 0)
+  const totalSpent = normalizedReceipts.reduce((sum, item) => sum + item.amount, 0)
   const categoryTotals = new Map<ReceiptCategory, number>()
   const monthlyBuckets = buildMonthlyBuckets(startDate, now)
   const monthlyIndex = new Map(monthlyBuckets.map((bucket) => [bucket.key, bucket]))
 
-  for (const item of receipts) {
+  for (const item of normalizedReceipts) {
     const category = item.category as ReceiptCategory
     categoryTotals.set(category, (categoryTotals.get(category) ?? 0) + item.amount)
 
@@ -152,6 +158,7 @@ function buildDashboard(receipts: ReceiptRecord[], timeFilter: DashboardTimeFilt
   const topCategoryEntry = Array.from(categoryTotals.entries()).sort((left, right) => right[1] - left[1])[0]
 
   return {
+    currency: ANALYTICS_CURRENCY,
     stats: {
       totalSpent,
       avgDaily: totalSpent / daySpan,
@@ -166,20 +173,21 @@ function buildDashboard(receipts: ReceiptRecord[], timeFilter: DashboardTimeFilt
         amount,
         percentage: totalSpent === 0 ? 0 : (amount / totalSpent) * 100,
       })),
-      transactions: receipts.map((item) => ({
-        id: item.id,
-        merchant: item.merchant,
-        amount: item.amount,
-        date: formatDate(item.date),
-        category: item.category,
-        status:
-          item.status === 'complete'
-            ? 'completed'
-            : item.status === 'error'
-              ? 'failed'
-              : 'pending',
-      })),
-    }
+    transactions: receipts.map((item) => ({
+      id: item.id,
+      merchant: item.merchant,
+      amount: item.amount,
+      currency: item.currency,
+      date: formatDate(item.date),
+      category: item.category,
+      status:
+        item.status === 'complete'
+          ? 'completed'
+          : item.status === 'error'
+            ? 'failed'
+            : 'pending',
+    })),
+  }
 }
 
 export function registerReceiptRoutes(app: Hono<{ Variables: AppVariables }>) {
@@ -383,7 +391,23 @@ export function registerReceiptRoutes(app: Hono<{ Variables: AppVariables }>) {
       .where(and(eq(receipt.userId, userId), gte(receipt.date, startDate)))
       .orderBy(desc(receipt.date), desc(receipt.createdAt))
 
-    return c.json(buildDashboard(receipts, parsed.data.timeFilter))
+    let normalizedReceipts: typeof receipts
+
+    try {
+      normalizedReceipts = await normalizeMoneyRecordsToCurrency(receipts, ANALYTICS_CURRENCY)
+    } catch (error) {
+      return c.json(
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : 'Unable to normalize dashboard amounts right now.',
+        },
+        503,
+      )
+    }
+
+    return c.json(buildDashboard(receipts, parsed.data.timeFilter, normalizedReceipts))
   })
 
   app.post('/api/receipts/optimize', async (c) => {
@@ -405,17 +429,44 @@ export function registerReceiptRoutes(app: Hono<{ Variables: AppVariables }>) {
         id: receipt.id,
         merchant: receipt.merchant,
         amount: receipt.amount,
+        currency: receipt.currency,
         category: receipt.category,
         paymentMethod: receipt.paymentMethod,
         date: receipt.date,
         notes: receipt.notes,
       })
       .from(receipt)
-      .where(and(eq(receipt.userId, userId), eq(receipt.status, 'complete')))
+      .where(
+        and(
+          eq(receipt.userId, userId),
+          eq(receipt.status, 'complete'),
+          gte(receipt.date, toStartOfDay(parsed.data.from)),
+          lte(receipt.date, toEndOfDay(parsed.data.to)),
+        ),
+      )
       .orderBy(desc(receipt.date), desc(receipt.createdAt))
 
-    const deterministicResponse = createOptimizerAnalysis(receipts, parsed.data.level)
-    const optimizedResponse = await enrichOptimizerSuggestions(deterministicResponse)
+    let normalizedReceipts: typeof receipts
+
+    try {
+      normalizedReceipts = await normalizeMoneyRecordsToCurrency(receipts, ANALYTICS_CURRENCY)
+    } catch (error) {
+      return c.json(
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : 'Unable to normalize optimizer amounts right now.',
+        },
+        503,
+      )
+    }
+
+    const deterministicResponse = createOptimizerAnalysis(normalizedReceipts, parsed.data.level)
+    const optimizedResponse = await enrichOptimizerSuggestions(deterministicResponse, {
+      from: parsed.data.from,
+      to: parsed.data.to,
+    })
 
     return c.json(optimizedResponse)
   })
@@ -469,9 +520,10 @@ export function registerReceiptRoutes(app: Hono<{ Variables: AppVariables }>) {
                 text: [
                   'You are extracting structured receipt data from a single image.',
                   'Return only the schema fields requested.',
+                  'Use ISO 4217 currency codes like TRY, USD, EUR, or GBP when the receipt currency is visible.',
                   'Infer pricing details, merchant, purchase date, payment method, line items, raw text, and a short spending summary.',
                   'Set `notes` to a concise 1-2 sentence summary describing what was purchased, how the money was spent, and any payment context that would help future budget optimization.',
-                  'Use null when a value is not visible. Keep confidence between 0 and 1.',
+                  'If currency is not visible or cannot be inferred confidently, return null for currency. Keep confidence between 0 and 1.',
                 ].join(' '),
               },
               {
@@ -483,9 +535,14 @@ export function registerReceiptRoutes(app: Hono<{ Variables: AppVariables }>) {
         ],
       })
 
+      const extractedReceipt = {
+        ...output,
+        currency: resolveReceiptCurrency(output.currency, DEFAULT_RECEIPT_CURRENCY),
+      }
+
       return c.json({
         fileName: file.name,
-        receipt: output,
+        receipt: extractedReceipt,
       })
     } catch (error) {
       return c.json(

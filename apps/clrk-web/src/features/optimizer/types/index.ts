@@ -11,6 +11,7 @@ export interface CutSuggestion {
 }
 
 export interface OptimizationResult {
+  currency: string
   level: OptimizationLevel
   totalCurrentSpend: number
   totalSavings: number

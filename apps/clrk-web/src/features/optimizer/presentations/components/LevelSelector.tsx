@@ -1,6 +1,8 @@
 import { Zap, Flame } from 'lucide-react'
 import { CardContent } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
+import DatePicker from '#/components/DatePicker'
+import { Label } from '#/components/ui/label'
 import GlassCard from '#/components/GlassCard'
 import { useOptimizerStore } from '../../stores/useOptimizerStore'
 import { useOptimize } from '../../hooks/useOptimize'
@@ -24,8 +26,9 @@ const LEVELS = [
 ] as const
 
 export default function LevelSelector() {
-  const { selectedLevel, selectLevel } = useOptimizerStore()
+  const { selectedLevel, selectLevel, fromDate, toDate, setFromDate, setToDate } = useOptimizerStore()
   const { mutate } = useOptimize()
+  const hasValidRange = Boolean(fromDate && toDate && fromDate <= toDate)
 
   return (
     <div className="space-y-8">
@@ -36,7 +39,31 @@ export default function LevelSelector() {
         <h2 className="mt-2 font-display text-lg font-bold text-foreground">
           How much do you want to save?
         </h2>
+        <p className="mt-2 font-mono text-xs text-muted-foreground">
+          Choose the spending window the optimizer should analyze.
+        </p>
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            From
+          </Label>
+          <DatePicker value={fromDate} onChange={setFromDate} />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            To
+          </Label>
+          <DatePicker value={toDate} onChange={setToDate} />
+        </div>
+      </div>
+
+      {!hasValidRange ? (
+        <p className="text-center font-mono text-[10px] uppercase tracking-widest text-destructive">
+          The start date must be on or before the end date.
+        </p>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
         {LEVELS.map((level) => {
@@ -83,7 +110,8 @@ export default function LevelSelector() {
       {selectedLevel && (
         <div className="flex justify-center">
           <Button
-            onClick={() => mutate(selectedLevel)}
+            disabled={!hasValidRange}
+            onClick={() => mutate({ level: selectedLevel, from: fromDate, to: toDate })}
             className="bg-brand font-mono text-sm font-bold uppercase tracking-wider text-brand-foreground hover:bg-brand/90"
           >
             Optimize My Spending

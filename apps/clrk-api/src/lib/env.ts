@@ -11,6 +11,7 @@ const envSchema = z.object({
   BETTER_AUTH_SECRET: z.string().min(1, 'BETTER_AUTH_SECRET is required'),
   OPENAI_API_KEY: z.string().min(1).optional(),
   OPENAI_MODEL: z.string().default('gpt-4.1-mini'),
+  REDIS_URL: z.string().url().optional(),
 })
 
 const parsedEnv = envSchema.safeParse(process.env)

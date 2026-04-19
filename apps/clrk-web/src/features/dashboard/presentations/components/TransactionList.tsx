@@ -34,6 +34,11 @@ export default function TransactionList({ transactions }: TransactionListProps) 
       {/* Rows */}
       {transactions.map((tx) => {
         const formattedDate = formatDateOnly(tx.date)
+        const formattedAmount = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: tx.currency,
+        }).format(tx.amount)
+
         return (
           <div
             key={tx.id}
@@ -46,7 +51,7 @@ export default function TransactionList({ transactions }: TransactionListProps) 
             <span className="hidden font-mono text-xs text-muted-foreground sm:block">{tx.category}</span>
             <StatusBadge status={tx.status} />
             <span className="font-mono text-sm font-bold text-foreground">
-              ${tx.amount.toFixed(2)}
+              {formattedAmount}
             </span>
           </div>
         )

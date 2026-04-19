@@ -18,6 +18,12 @@ export const Route = createFileRoute('/_app/dashboard')({
 
 function DashboardPage() {
   const { data, isLoading } = useDashboardData()
+  const totalSpent = data
+    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.stats.totalSpent)
+    : ''
+  const averageDaily = data
+    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.stats.avgDaily)
+    : ''
 
   return (
     <div className="min-h-full">
@@ -58,13 +64,13 @@ function DashboardPage() {
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <StatCard
               label="Total Spent"
-              value={`$${data.stats.totalSpent.toLocaleString()}`}
+              value={totalSpent}
               trend="+4.2% vs last period"
               trendUp={false}
             />
             <StatCard
               label="Avg. Daily"
-              value={`$${data.stats.avgDaily.toFixed(2)}`}
+              value={averageDaily}
             />
             <StatCard
               label="Top Category"
@@ -86,14 +92,14 @@ function DashboardPage() {
               <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 Spending Over Time
               </p>
-              <SpendingChart data={data.monthlySpend} />
+              <SpendingChart currency={data.currency} data={data.monthlySpend} />
             </GlassCard>
 
             <GlassCard className="p-5">
               <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 Spending by Category
               </p>
-              <CategoryBars data={data.categorySpend} />
+              <CategoryBars currency={data.currency} data={data.categorySpend} />
             </GlassCard>
           </div>
         )}

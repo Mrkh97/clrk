@@ -3,6 +3,7 @@ import { generateText, Output } from 'ai'
 import { z } from 'zod'
 import { env } from '../../lib/env.js'
 import type { OptimizerResponse } from './optimizer-analysis.js'
+import { optimizerCalculationTools } from './optimizer-tools.js'
 
 const optimizerReasonSchema = z.object({
   suggestions: z.array(
@@ -32,6 +33,7 @@ function isUsableEnrichment(output: z.infer<typeof optimizerReasonSchema>, sugge
 
 export async function enrichOptimizerSuggestions(
   response: OptimizerResponse,
+  dateRange: { from: string; to: string },
 ): Promise<OptimizerResponse> {
   if (!env.OPENAI_API_KEY || response.suggestions.length === 0) {
     return response
@@ -47,6 +49,7 @@ export async function enrichOptimizerSuggestions(
     const { output } = await generateText({
       model: openai.responses(optimizerModel),
       output: Output.object({ schema: optimizerReasonSchema }),
+      tools: optimizerCalculationTools,
       messages: [
         {
           role: 'user',
@@ -58,7 +61,10 @@ export async function enrichOptimizerSuggestions(
                 'Keep every original suggestion id and return one concise reason per suggestion.',
                 'Make each reason practical, specific, and grounded in the provided spend pattern, including note context already embedded in the suggestion reasons when present.',
                 'Prefer clearer prioritization, not new math. Do not change savings values.',
+                'Use the calculation tools when you mention savings percentages or normalize spending across the analysis window.',
+                `All monetary totals are normalized to ${response.currency}.`,
                 `Current level: ${response.level}.`,
+                `Analysis window: ${dateRange.from} to ${dateRange.to}.`,
                 `Current spend total: ${response.totalCurrentSpend}.`,
                 `Deterministic suggestions: ${JSON.stringify(response.suggestions)}.`,
               ].join(' '),

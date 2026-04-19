@@ -17,10 +17,17 @@ function getCategoryColor(category: string): string {
 }
 
 interface CategoryBarsProps {
+  currency: string
   data: CategorySpend[]
 }
 
-export default function CategoryBars({ data }: CategoryBarsProps) {
+export default function CategoryBars({ currency, data }: CategoryBarsProps) {
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  })
+
   return (
     <div className="space-y-4">
       {data.map((item) => {
@@ -33,7 +40,7 @@ export default function CategoryBars({ data }: CategoryBarsProps) {
                 {item.category}
               </span>
               <span className="font-mono text-xs font-bold text-foreground">
-                ${item.amount.toLocaleString()}
+                {formatter.format(item.amount)}
               </span>
             </div>
             <div className="flex gap-0.5">
