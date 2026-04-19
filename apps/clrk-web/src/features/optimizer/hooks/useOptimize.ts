@@ -1,61 +1,12 @@
 import { useMutation } from '@tanstack/react-query'
-import { apiBaseUrl } from '#/lib/auth-client'
-import type { OptimizationLevel, OptimizationResult, CutSuggestion } from '../types'
+import { optimizeBudget } from '../data/remote-optimizer-repository'
 import { useOptimizerStore } from '../stores/useOptimizerStore'
-
-type OptimizeRequest = {
-  level: OptimizationLevel
-  from: string
-  to: string
-}
-
-type OptimizeResponse = {
-  currency: string
-  level: OptimizationLevel
-  totalCurrentSpend: number
-  totalSavings: number
-  suggestions: CutSuggestion[]
-}
-
-async function parseError(response: Response) {
-  try {
-    const payload = (await response.json()) as { error?: string; message?: string }
-    return payload.error ?? payload.message ?? 'Unable to optimize budget.'
-  } catch {
-    return 'Unable to optimize budget.'
-  }
-}
-
-async function optimize({ level, from, to }: OptimizeRequest): Promise<OptimizationResult> {
-  const response = await fetch(`${apiBaseUrl}/api/receipts/optimize`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ level, from, to }),
-  })
-
-  if (!response.ok) {
-    throw new Error(await parseError(response))
-  }
-
-  const payload = (await response.json()) as OptimizeResponse
-
-  return {
-    currency: payload.currency,
-    level: payload.level,
-    totalCurrentSpend: payload.totalCurrentSpend,
-    totalSavings: payload.totalSavings,
-    suggestions: payload.suggestions,
-  }
-}
 
 export function useOptimize() {
   const { setResult, setError, setPhase } = useOptimizerStore()
 
   return useMutation({
-    mutationFn: optimize,
+    mutationFn: optimizeBudget,
     onMutate: () => setPhase('loading'),
     onSuccess: (data) => setResult(data),
     onError: (err) => setError(err instanceof Error ? err.message : 'Something went wrong'),

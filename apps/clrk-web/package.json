@@ -29,6 +29,7 @@
     "@tanstack/router-plugin": "^1.132.0",
     "@tanstack/start-client-core": "^1.167.9",
     "@tanstack/start-server-core": "^1.167.9",
+    "axios": "^1.12.2",
     "better-auth": "^1.6.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

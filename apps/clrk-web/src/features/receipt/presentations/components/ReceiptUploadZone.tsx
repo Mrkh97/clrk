@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { AlertCircle, CheckCircle, CloudUpload, LoaderCircle } from 'lucide-react'
 import { Button } from '#/components/ui/button'
-import { apiBaseUrl } from '#/lib/auth-client'
+import { extractReceipt } from '../../data/remote-receipt-repository'
 import { useReceiptStore } from '../../stores/useReceiptStore'
-import type { ReceiptExtractionResponse } from '../../types'
 
 const TOTAL_SEGMENTS = 20
 
@@ -41,41 +40,15 @@ export default function ReceiptUploadZone() {
     }, 140)
   }, [setUploadPhase, setUploadProgress, stopProgressAnimation])
 
-  const extractReceipt = useCallback(async (file: File) => {
+  const runReceiptExtraction = useCallback(async (file: File) => {
     if (uploadState.phase === 'processing') {
       return
     }
 
     startProcessing(file.name)
 
-    const formData = new FormData()
-    formData.append('file', file)
-
     try {
-      const response = await fetch(`${apiBaseUrl}/api/receipts/extract`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-          let message = 'Receipt extraction failed. Please try again.'
-
-          try {
-            const errorBody = await response.json() as { error?: string; message?: string }
-            if (errorBody.error) {
-              message = errorBody.error
-            } else if (errorBody.message) {
-              message = errorBody.message
-            }
-          } catch {
-            // Ignore parse errors and fall back to a stable message.
-        }
-
-        throw new Error(message)
-      }
-
-      const payload = await response.json() as ReceiptExtractionResponse
+      const payload = await extractReceipt(file)
       stopProgressAnimation()
       setUploadProgress(100)
       setExtractionResult(payload.fileName, payload.receipt)
@@ -99,10 +72,10 @@ export default function ReceiptUploadZone() {
       }
       const file = e.dataTransfer.files[0]
       if (file) {
-        void extractReceipt(file)
+        void runReceiptExtraction(file)
       }
     },
-    [extractReceipt, uploadState.phase],
+    [runReceiptExtraction, uploadState.phase],
   )
 
   const handleFileChange = useCallback(
@@ -112,10 +85,10 @@ export default function ReceiptUploadZone() {
       }
       const file = e.target.files?.[0]
       if (file) {
-        void extractReceipt(file)
+        void runReceiptExtraction(file)
       }
     },
-    [extractReceipt, uploadState.phase],
+    [runReceiptExtraction, uploadState.phase],
   )
 
   const filledSegments = Math.round((uploadState.progress / 100) * TOTAL_SEGMENTS)
