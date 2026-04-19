@@ -30,18 +30,33 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   build_runner: ^2.13.1
+  flutter_launcher_icons: ^0.14.4
   riverpod_generator: ^4.0.3
 
 flutter:
   uses-material-design: true
 
 flutter_native_splash:
-  color: "#101113"
-  color_dark: "#101113"
+  color: "#0F1420"
+  color_dark: "#0F1420"
+  image: assets/branding/clrk-icon.png
+  image_dark: assets/branding/clrk-icon.png
   fullscreen: true
   android: true
   ios: true
   web: false
   android_12:
-    color: "#101113"
-    color_dark: "#101113"
+    color: "#0F1420"
+    color_dark: "#0F1420"
+    image: assets/branding/clrk-icon.png
+    image_dark: assets/branding/clrk-icon.png
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/branding/clrk-icon.png
+  remove_alpha_ios: true
+  adaptive_icon_background: "#0F1420"
+  adaptive_icon_foreground: assets/branding/clrk-mark.png
+  adaptive_icon_monochrome: assets/branding/clrk-mark.png
+  adaptive_icon_foreground_inset: 0

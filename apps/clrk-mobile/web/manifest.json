@@ -1,6 +1,6 @@
 {
-    "name": "clrk_mobile",
-    "short_name": "clrk_mobile",
+    "name": "clrk",
+    "short_name": "clrk",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
