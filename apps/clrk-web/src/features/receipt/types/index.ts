@@ -1,13 +1,18 @@
-export type ReceiptCategory =
-  | 'food'
-  | 'transport'
-  | 'utilities'
-  | 'entertainment'
-  | 'health'
-  | 'shopping'
-  | 'other'
+export const RECEIPT_CATEGORIES = [
+  'food',
+  'transport',
+  'utilities',
+  'entertainment',
+  'health',
+  'shopping',
+  'other',
+] as const
 
-export type PaymentMethod = 'cash' | 'card' | 'digital'
+export type ReceiptCategory = (typeof RECEIPT_CATEGORIES)[number]
+
+export const PAYMENT_METHODS = ['cash', 'card', 'digital'] as const
+
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
 
 export const COMMON_RECEIPT_CURRENCIES = ['TRY', 'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'CHF', 'JPY'] as const
 
@@ -88,4 +93,10 @@ export const RECEIPT_CATEGORY_LABELS: Record<ReceiptCategory, string> = {
   health: 'Health',
   shopping: 'Shopping',
   other: 'Other',
+}
+
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  cash: 'Cash',
+  card: 'Card',
+  digital: 'Digital',
 }

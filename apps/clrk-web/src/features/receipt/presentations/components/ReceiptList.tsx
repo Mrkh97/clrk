@@ -1,4 +1,6 @@
+import { useForm, useStore } from '@tanstack/react-form'
 import { useMemo, useState } from 'react'
+import { z } from 'zod'
 import DatePicker from '#/components/DatePicker'
 import { Button } from '#/components/ui/button'
 import {
@@ -19,71 +21,120 @@ import {
 } from '#/components/ui/select'
 import { useDeleteReceipt, useReceipts } from '../../hooks/useReceipts'
 import { useReceiptStore } from '../../stores/useReceiptStore'
-import { RECEIPT_CATEGORY_LABELS, type Receipt, type ReceiptCategory } from '../../types'
+import { Field, FieldError, FieldLabel, getFieldErrorText, isFieldInvalid } from '#/components/ui/form'
+import {
+  RECEIPT_CATEGORIES,
+  RECEIPT_CATEGORY_LABELS,
+  type Receipt,
+  type ReceiptCategory,
+} from '../../types'
 import ReceiptCard from './ReceiptCard'
 
-function ReceiptFiltersBar({
-  from,
-  to,
-  category,
-  onFromChange,
-  onToChange,
-  onCategoryChange,
-}: {
+const filterCategories = ['all', ...RECEIPT_CATEGORIES] as const
+
+type ReceiptFilterValues = {
   from: string
   to: string
   category: 'all' | ReceiptCategory
-  onFromChange: (value: string) => void
-  onToChange: (value: string) => void
-  onCategoryChange: (value: 'all' | ReceiptCategory) => void
-}) {
-  return (
-    <div className="grid gap-2 rounded-xl border border-border/70 bg-background/30 p-3 sm:grid-cols-3">
-      <DatePicker
-        value={from}
-        onChange={onFromChange}
-        placeholder="From date"
-        clearable
-        className="h-9 rounded-md border border-input bg-background px-3 text-left text-xs font-medium hover:bg-background"
-      />
-      <DatePicker
-        value={to}
-        onChange={onToChange}
-        placeholder="To date"
-        clearable
-        className="h-9 rounded-md border border-input bg-background px-3 text-left text-xs font-medium hover:bg-background"
-      />
-      <Select value={category} onValueChange={(value) => onCategoryChange(value as 'all' | ReceiptCategory)}>
-        <SelectTrigger className="font-mono text-xs uppercase tracking-wider">
-          <SelectValue placeholder="Category" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All categories</SelectItem>
-          {Object.entries(RECEIPT_CATEGORY_LABELS).map(([value, label]) => (
-            <SelectItem key={value} value={value}>
-              {label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  )
+}
+
+const receiptFilterSchema = z.object({
+  from: z.string().refine((value) => value === '' || normalizeFilterDate(value), 'Pick a valid start date.'),
+  to: z.string().refine((value) => value === '' || normalizeFilterDate(value), 'Pick a valid end date.'),
+  category: z.enum(filterCategories),
+})
+
+const defaultFilterValues: ReceiptFilterValues = {
+  from: '',
+  to: '',
+  category: 'all',
 }
 
 export default function ReceiptList() {
-  const [from, setFrom] = useState('')
-  const [to, setTo] = useState('')
-  const [category, setCategory] = useState<'all' | ReceiptCategory>('all')
   const [pendingDeleteReceipt, setPendingDeleteReceipt] = useState<Receipt | null>(null)
   const { selectedReceiptId, selectReceipt } = useReceiptStore()
   const { mutate: deleteReceipt, isPending: isDeleting } = useDeleteReceipt()
+  const form = useForm({ defaultValues: defaultFilterValues })
+  const filterValues = useStore(form.store, (state) => state.values)
+  const ReceiptFiltersBar = () => (
+    <div className="grid gap-2 rounded-xl border border-border/70 bg-background/30 p-3 sm:grid-cols-3">
+      <form.Field
+        name="from"
+        validators={{
+          onChange: receiptFilterSchema.shape.from,
+        }}
+      >
+        {(field) => (
+          <Field field={field} className="space-y-1">
+            <FieldLabel className="sr-only">From date</FieldLabel>
+            <DatePicker
+              value={field.state.value}
+              onChange={field.handleChange}
+              placeholder="From date"
+              clearable
+              className={`h-9 rounded-md border border-input bg-background px-3 text-left text-xs font-medium hover:bg-background ${
+                isFieldInvalid(field) ? 'border-destructive text-destructive' : ''
+              }`}
+            />
+            <FieldError className="text-xs">{getFieldErrorText(field)}</FieldError>
+          </Field>
+        )}
+      </form.Field>
+      <form.Field
+        name="to"
+        validators={{
+          onChange: receiptFilterSchema.shape.to,
+        }}
+      >
+        {(field) => (
+          <Field field={field} className="space-y-1">
+            <FieldLabel className="sr-only">To date</FieldLabel>
+            <DatePicker
+              value={field.state.value}
+              onChange={field.handleChange}
+              placeholder="To date"
+              clearable
+              className={`h-9 rounded-md border border-input bg-background px-3 text-left text-xs font-medium hover:bg-background ${
+                isFieldInvalid(field) ? 'border-destructive text-destructive' : ''
+              }`}
+            />
+            <FieldError className="text-xs">{getFieldErrorText(field)}</FieldError>
+          </Field>
+        )}
+      </form.Field>
+      <form.Field name="category">
+        {(field) => (
+          <Field field={field} className="space-y-1">
+            <FieldLabel className="sr-only">Category</FieldLabel>
+            <Select
+              value={field.state.value}
+              onValueChange={(value) => field.handleChange(value as ReceiptFilterValues['category'])}
+            >
+              <SelectTrigger className="font-mono text-xs uppercase tracking-wider">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All categories</SelectItem>
+                {Object.entries(RECEIPT_CATEGORY_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldError className="text-xs">{getFieldErrorText(field)}</FieldError>
+          </Field>
+        )}
+      </form.Field>
+    </div>
+  )
   const filters = useMemo(
     () => ({
-      from: from || undefined,
-      to: to || undefined,
-      category: category === 'all' ? undefined : category,
+      from: filterValues.from || undefined,
+      to: filterValues.to || undefined,
+      category: filterValues.category === 'all' ? undefined : filterValues.category,
     }),
-    [category, from, to],
+    [filterValues],
   )
   const { data: receipts, isLoading } = useReceipts(filters)
 
@@ -109,23 +160,12 @@ export default function ReceiptList() {
             variant="ghost"
             size="sm"
             className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
-            onClick={() => {
-              setFrom('')
-              setTo('')
-              setCategory('all')
-            }}
+            onClick={() => form.reset()}
           >
             Clear filters
           </Button>
         </div>
-        <ReceiptFiltersBar
-          from={from}
-          to={to}
-          category={category}
-          onFromChange={setFrom}
-          onToChange={setTo}
-          onCategoryChange={setCategory}
-        />
+        <ReceiptFiltersBar />
         <div className="glass-card flex flex-col items-center justify-center border border-dashed py-16 text-center">
           <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
             No receipts found
@@ -149,23 +189,12 @@ export default function ReceiptList() {
           variant="ghost"
           size="sm"
           className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
-          onClick={() => {
-            setFrom('')
-            setTo('')
-            setCategory('all')
-          }}
+          onClick={() => form.reset()}
         >
           Clear filters
         </Button>
       </div>
-      <ReceiptFiltersBar
-        from={from}
-        to={to}
-        category={category}
-        onFromChange={setFrom}
-        onToChange={setTo}
-        onCategoryChange={setCategory}
-      />
+      <ReceiptFiltersBar />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {receipts.map((receipt) => (
           <ReceiptCard
@@ -216,4 +245,8 @@ export default function ReceiptList() {
       </AlertDialog>
     </div>
   )
+}
+
+function normalizeFilterDate(value: string) {
+  return Number.isNaN(new Date(value).getTime()) ? null : value
 }

@@ -1,5 +1,5 @@
-import type { CreateReceipt } from './schema.js'
-import { seededUserId } from './seed-data.js'
+import type { CreateReceipt } from '../receipts/schema.js'
+import { seededUserId } from '@/utils/seed.js'
 
 type OptimizerMerchantTemplate = {
   merchant: string

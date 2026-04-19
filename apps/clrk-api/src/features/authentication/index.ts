@@ -1,3 +1,4 @@
 export { auth, type AuthSession } from './auth.js'
-export { authSessionMiddleware, type AppVariables } from './middleware.js'
-export { registerAuthenticationRoutes } from './routes.js'
+export { authHandler, verifyEmailHandler } from './handler.js'
+export { authSessionMiddleware, type AppContext, type AppEnv, type AppVariables } from './middleware.js'
+export { authenticationRoutes } from './routes.js'

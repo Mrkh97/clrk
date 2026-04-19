@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { generateSeedReceipts } from '../receipts/seed-data.js'
 import { createOptimizerAnalysis } from './optimizer-analysis.js'
-import { generateSeedReceipts } from './seed-data.js'
 
 test('createOptimizerAnalysis returns savings-oriented suggestions for easy level', () => {
   const receipts = generateSeedReceipts().map((receipt) => ({

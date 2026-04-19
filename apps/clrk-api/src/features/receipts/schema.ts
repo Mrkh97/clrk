@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { DEFAULT_RECEIPT_CURRENCY, resolveReceiptCurrency } from './currency.js'
+import { DEFAULT_RECEIPT_CURRENCY, resolveReceiptCurrency } from '@/utils/currency.js'
 
 export const receiptCategories = [
   'food',
@@ -76,19 +76,6 @@ export const dashboardQuerySchema = z.object({
   timeFilter: dashboardTimeFilterSchema,
 })
 
-export const optimizerLevelSchema = z.enum(['easy', 'hard'])
-
-export const optimizerRequestSchema = z
-  .object({
-    level: optimizerLevelSchema,
-    from: receiptDateSchema,
-    to: receiptDateSchema,
-  })
-  .refine((value) => value.from <= value.to, {
-    message: '`from` must be on or before `to`.',
-    path: ['from'],
-  })
-
 export const extractedReceiptSchema = z.object({
   merchant: z.string().nullable(),
   currency: z.string().nullable(),
@@ -116,5 +103,3 @@ export type ReceiptCategory = z.infer<typeof receiptCategorySchema>
 export type DashboardTimeFilter = z.infer<typeof dashboardTimeFilterSchema>
 export type CreateReceipt = z.infer<typeof createReceiptSchema>
 export type UpdateReceipt = z.infer<typeof updateReceiptSchema>
-export type OptimizerLevel = z.infer<typeof optimizerLevelSchema>
-export type OptimizerRequest = z.infer<typeof optimizerRequestSchema>

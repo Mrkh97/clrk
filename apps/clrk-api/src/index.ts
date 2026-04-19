@@ -2,16 +2,20 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import {
+  authenticationRoutes,
   authSessionMiddleware,
-  registerAuthenticationRoutes,
-  type AppVariables,
+  type AppEnv,
+  verifyEmailHandler,
 } from './features/authentication/index.js'
-import { registerReceiptRoutes } from './features/receipts/index.js'
+import { optimizerRoutes } from './features/optimizer/index.js'
+import { dashboardRoutes, receiptsRoutes } from './features/receipts/index.js'
+import { API_BASE_PATH } from './lib/api-paths.js'
 import { env, isAllowedWebOrigin } from './lib/env.js'
 
-const app = new Hono<{ Variables: AppVariables }>()
+const app = new Hono<AppEnv>()
+const api = app.basePath(API_BASE_PATH)
 
-app.use('/api/*', cors({
+api.use('*', cors({
   origin: (origin) => (isAllowedWebOrigin(origin) ? origin : env.WEB_ORIGIN),
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
@@ -26,14 +30,18 @@ app.get('/', (c) => {
   })
 })
 
-app.get('/api/health', (c) => {
+app.get('/verify-email', verifyEmailHandler)
+
+api.get('/health', (c) => {
   return c.json({
     ok: true,
   })
 })
 
-registerAuthenticationRoutes(app)
-registerReceiptRoutes(app)
+api.route('/auth', authenticationRoutes)
+api.route('/dashboard', dashboardRoutes)
+api.route('/receipts/optimize', optimizerRoutes)
+api.route('/receipts', receiptsRoutes)
 
 serve(
   {

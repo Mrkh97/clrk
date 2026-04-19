@@ -1,4 +1,4 @@
-import { fetchLatestExchangeRate } from '../../infrastructure/external-apis/frankfurter.js'
+import { fetchLatestExchangeRate } from '../infrastructure/external-apis/frankfurter.js'
 
 type RateLookup = (base: string, quote: string) => Promise<{ rate: number }>
 

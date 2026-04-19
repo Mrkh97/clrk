@@ -2,8 +2,8 @@ import { eq } from 'drizzle-orm'
 import {
   generateOptimizerSeedReceipts,
   summarizeOptimizerSeedReceipts,
-} from '../features/receipts/optimizer-seed-data.js'
-import { seededUserId } from '../features/receipts/seed-data.js'
+} from '../features/optimizer/optimizer-seed-data.js'
+import { seededUserId } from '../utils/seed.js'
 
 const applyMode = process.argv.includes('--apply')
 const receipts = generateOptimizerSeedReceipts()

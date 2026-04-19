@@ -13,12 +13,12 @@
     "start": "NODE_ENV=production node --import ./dist/server/instrument.server.mjs dist/server/server.js"
   },
   "dependencies": {
-    "@faker-js/faker": "^10.3.0",
     "@sentry/tanstackstart-react": "^10.42.0",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/intent": "^0.0.29",
     "@tanstack/match-sorter-utils": "latest",
     "@tanstack/react-devtools": "latest",
+    "@tanstack/react-form": "^1.29.0",
     "@tanstack/react-query": "latest",
     "@tanstack/react-query-devtools": "latest",
     "@tanstack/react-router": "latest",

@@ -1,6 +1,5 @@
+import { seededUserId } from '@/utils/seed.js'
 import type { CreateReceipt } from './schema.js'
-
-const seededUserId = 'PS7COev56TtUFmJPQNizNj7NISo2t1X4'
 
 type MerchantTemplate = {
   merchant: string

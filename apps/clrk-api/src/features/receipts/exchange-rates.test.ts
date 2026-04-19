@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { normalizeMoneyRecordsToCurrency } from './exchange-rates.js'
+import { normalizeMoneyRecordsToCurrency } from '@/utils/exchange-rates.js'
 
 test('normalizeMoneyRecordsToCurrency converts mixed amounts into the target currency', async () => {
   const records = await normalizeMoneyRecordsToCurrency(
@@ -9,7 +9,7 @@ test('normalizeMoneyRecordsToCurrency converts mixed amounts into the target cur
       { amount: 50, currency: 'TRY', id: 'try' },
     ],
     'TRY',
-    async (base, quote) => {
+    async (base: string, quote: string) => {
       assert.equal(quote, 'TRY')
       return { rate: base === 'USD' ? 38.5 : 1 }
     },

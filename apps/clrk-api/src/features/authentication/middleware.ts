@@ -1,14 +1,19 @@
-import type { MiddlewareHandler } from 'hono'
+import type { Context, MiddlewareHandler } from 'hono'
+import { API_BASE_PATH } from '@/lib/api-paths.js'
 import { auth, type AuthSession } from './auth.js'
 
 type VerificationAwareUser = Pick<AuthSession['user'], 'emailVerified'>
 
 export function isPublicVerificationPath(path: string) {
-  return path === '/api/health' || path.startsWith('/api/auth/') || path === '/verify-email'
+  return (
+    path === `${API_BASE_PATH}/health`
+    || path.startsWith(`${API_BASE_PATH}/auth/`)
+    || path === '/verify-email'
+  )
 }
 
 export function shouldBlockUnverifiedUser(path: string, user: VerificationAwareUser | null) {
-  if (!path.startsWith('/api/')) {
+  if (!path.startsWith(`${API_BASE_PATH}/`)) {
     return false
   }
 
@@ -24,7 +29,13 @@ export type AppVariables = {
   session: AuthSession['session'] | null
 }
 
-export const authSessionMiddleware: MiddlewareHandler<{ Variables: AppVariables }> = async (
+export type AppEnv = {
+  Variables: AppVariables
+}
+
+export type AppContext = Context<AppEnv>
+
+export const authSessionMiddleware: MiddlewareHandler<AppEnv> = async (
   c,
   next,
 ) => {

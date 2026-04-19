@@ -1,5 +1,5 @@
 import { createClient } from 'redis'
-import { env } from '../../lib/env.js'
+import { env } from '@/lib/env.js'
 
 export type StringCache = {
   get(key: string): Promise<string | null>

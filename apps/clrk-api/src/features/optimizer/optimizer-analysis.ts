@@ -1,7 +1,6 @@
-import type { ReceiptCategory } from './schema.js'
-import { ANALYTICS_CURRENCY } from './currency.js'
-
-export type OptimizerLevel = 'easy' | 'hard'
+import type { ReceiptCategory } from '../receipts/schema.js'
+import { ANALYTICS_CURRENCY } from '@/utils/currency.js'
+import type { OptimizerLevel } from './schema.js'
 
 export type ReceiptOptimizerInput = {
   id: string
@@ -243,7 +242,7 @@ function buildFallbackReason(group: MerchantGroup, level: OptimizerLevel) {
     return `${group.merchant} is meaningful transport spend, and modest trip consolidation can usually reduce this without fully removing it.${noteContext}`
   }
 
-   return `${group.merchant} is one of the larger receipt patterns in this category, so a targeted reduction here creates savings faster than spreading cuts everywhere.${noteContext}`
+  return `${group.merchant} is one of the larger receipt patterns in this category, so a targeted reduction here creates savings faster than spreading cuts everywhere.${noteContext}`
 }
 
 export function createOptimizerAnalysis(

@@ -1,7 +1,7 @@
 import { createOpenAI } from '@ai-sdk/openai'
 import { generateText, Output } from 'ai'
 import { z } from 'zod'
-import { env } from '../../lib/env.js'
+import { env } from '@/lib/env.js'
 import type { OptimizerResponse } from './optimizer-analysis.js'
 import { optimizerCalculationTools } from './optimizer-tools.js'
 

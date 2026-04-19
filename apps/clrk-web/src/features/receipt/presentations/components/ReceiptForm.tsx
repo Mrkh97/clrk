@@ -1,29 +1,31 @@
-import { useEffect, useState } from 'react'
+import { useForm, useStore } from '@tanstack/react-form'
+import { useEffect } from 'react'
+import { z } from 'zod'
 import { Button } from '#/components/ui/button'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  getFieldErrorText,
+  isFieldInvalid,
+} from '#/components/ui/form'
 import { Input } from '#/components/ui/input'
-import { Label } from '#/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '#/components/ui/select'
 import { Textarea } from '#/components/ui/textarea'
 import DatePicker from '#/components/DatePicker'
 import { useAddReceipt, useReceipt, useUpdateReceipt } from '../../hooks/useReceipts'
 import { useReceiptStore } from '../../stores/useReceiptStore'
-import { COMMON_RECEIPT_CURRENCIES, type ExtractedReceipt, type ReceiptCategory, type ReceiptFormValues } from '../../types'
-
-const CATEGORIES: { value: ReceiptCategory; label: string }[] = [
-  { value: 'food', label: 'Food & Dining' },
-  { value: 'transport', label: 'Transport' },
-  { value: 'utilities', label: 'Utilities' },
-  { value: 'entertainment', label: 'Entertainment' },
-  { value: 'health', label: 'Health' },
-  { value: 'shopping', label: 'Shopping' },
-  { value: 'other', label: 'Other' },
-]
-
-const PAYMENT_METHODS = [
-  { value: 'card', label: 'Card' },
-  { value: 'cash', label: 'Cash' },
-  { value: 'digital', label: 'Digital' },
-] as const
+import {
+  COMMON_RECEIPT_CURRENCIES,
+  PAYMENT_METHOD_LABELS,
+  PAYMENT_METHODS,
+  RECEIPT_CATEGORIES,
+  RECEIPT_CATEGORY_LABELS,
+  type ExtractedReceipt,
+  type Receipt,
+  type ReceiptFormValues,
+} from '../../types'
 
 const CURRENCY_LABELS: Record<string, string> = {
   TRY: 'Turkish Lira (₺)',
@@ -46,8 +48,20 @@ const defaultValues: ReceiptFormValues = {
   notes: '',
 }
 
+const receiptFormSchema = z.object({
+  merchant: z.string().trim().min(1, 'Merchant is required.'),
+  amount: z.string().trim().refine((value) => {
+    const amount = Number.parseFloat(value)
+    return Number.isFinite(amount) && amount > 0
+  }, 'Enter a valid amount.'),
+  currency: z.string().trim().min(1, 'Currency is required.'),
+  date: z.string().refine((value) => normalizeReceiptDate(value) !== null, 'Pick a valid date.'),
+  category: z.enum(RECEIPT_CATEGORIES),
+  paymentMethod: z.enum(PAYMENT_METHODS),
+  notes: z.string(),
+})
+
 export default function ReceiptForm() {
-  const [values, setValues] = useState<ReceiptFormValues>(defaultValues)
   const { mutate: addReceipt, isPending: isCreating } = useAddReceipt()
   const { mutate: updateReceipt, isPending: isUpdating } = useUpdateReceipt()
   const { uploadState, extractedReceipt, resetUpload, selectedReceiptId, selectReceipt } = useReceiptStore()
@@ -56,44 +70,70 @@ export default function ReceiptForm() {
   const isPending = isCreating || isUpdating
   const isAiExtracted = uploadState.phase === 'complete' && !isEditing
 
+  const form = useForm({
+    defaultValues,
+    onSubmit: ({ value }) => {
+      const values = receiptFormSchema.parse(value)
+      const aiExtracted = isEditing
+        ? (selectedReceipt?.aiExtracted ?? false)
+        : Boolean(extractedReceipt)
+
+      const payload = {
+        ...values,
+        aiExtracted,
+      }
+
+      const onSuccess = () => {
+        form.reset(defaultValues)
+        resetUpload()
+        selectReceipt(null)
+      }
+
+      if (selectedReceiptId) {
+        if (!selectedReceipt) {
+          return
+        }
+
+        updateReceipt({ id: selectedReceiptId, values: payload }, { onSuccess })
+        return
+      }
+
+      addReceipt(payload, { onSuccess })
+    },
+  })
+  const values = useStore(form.store, (state) => state.values)
+
   useEffect(() => {
     if (!selectedReceipt) {
       return
     }
 
-    setValues({
-      merchant: selectedReceipt.merchant,
-      amount: selectedReceipt.amount.toFixed(2),
-      currency: selectedReceipt.currency,
-      date: selectedReceipt.date,
-      category: selectedReceipt.category,
-      paymentMethod: selectedReceipt.paymentMethod,
-      notes: selectedReceipt.notes ?? '',
-    })
-  }, [selectedReceipt])
+    form.reset(getReceiptFormValues(selectedReceipt), { keepDefaultValues: true })
+  }, [form, selectedReceipt])
 
   useEffect(() => {
     if (!extractedReceipt || isEditing) {
       return
     }
 
-    setValues((current) => ({
-      ...current,
-      merchant: extractedReceipt.merchant || current.merchant,
-      amount:
-        extractedReceipt.total != null
-          ? extractedReceipt.total.toFixed(2)
-          : current.amount,
-      currency: extractedReceipt.currency || current.currency,
-      date: normalizeReceiptDate(extractedReceipt.date) ?? current.date,
-      paymentMethod: extractedReceipt.paymentMethod ?? current.paymentMethod,
-      notes: extractedReceipt.notes ?? current.notes,
-    }))
-  }, [extractedReceipt, isEditing])
+    const current = form.state.values
 
-  const set = (field: keyof ReceiptFormValues) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => setValues((prev) => ({ ...prev, [field]: e.target.value }))
+    form.reset(
+      {
+        ...current,
+        merchant: extractedReceipt.merchant || current.merchant,
+        amount:
+          extractedReceipt.total != null
+            ? extractedReceipt.total.toFixed(2)
+            : current.amount,
+        currency: extractedReceipt.currency || current.currency,
+        date: normalizeReceiptDate(extractedReceipt.date) ?? current.date,
+        paymentMethod: extractedReceipt.paymentMethod ?? current.paymentMethod,
+        notes: extractedReceipt.notes ?? current.notes,
+      },
+      { keepDefaultValues: true },
+    )
+  }, [extractedReceipt, form, isEditing])
 
   const currencyOptions = values.currency && !COMMON_RECEIPT_CURRENCIES.includes(values.currency as never)
     ? [values.currency, ...COMMON_RECEIPT_CURRENCIES]
@@ -101,38 +141,15 @@ export default function ReceiptForm() {
 
   const amountAdornment = getCurrencyAdornment(values.currency)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const aiExtracted = isEditing
-      ? (selectedReceipt?.aiExtracted ?? false)
-      : Boolean(extractedReceipt)
-
-    const payload = {
-      ...values,
-      aiExtracted,
-    }
-
-    const onSuccess = () => {
-      setValues(defaultValues)
-      resetUpload()
-      selectReceipt(null)
-    }
-
-    if (selectedReceiptId) {
-      if (!selectedReceipt) {
-        return
-      }
-
-      updateReceipt({ id: selectedReceiptId, values: payload }, { onSuccess })
-      return
-    }
-
-    addReceipt(payload, { onSuccess })
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form
+      onSubmit={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        void form.handleSubmit()
+      }}
+      className="flex flex-col gap-5"
+    >
       {isEditing && (
         <div className="flex items-center justify-between rounded-lg border border-brand/20 bg-brand-muted px-3 py-2">
           <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-brand">
@@ -145,7 +162,7 @@ export default function ReceiptForm() {
             className="h-7 px-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
             onClick={() => {
               selectReceipt(null)
-              setValues(defaultValues)
+              form.reset(defaultValues)
             }}
           >
             Cancel
@@ -166,132 +183,207 @@ export default function ReceiptForm() {
         </div>
       )}
 
-      {/* Merchant */}
-      <div className="space-y-1.5">
-        <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Merchant
-        </Label>
-        <Input
-          placeholder="e.g. Whole Foods Market"
-          value={values.merchant}
-          onChange={set('merchant')}
-          required
-          className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 text-sm focus-visible:border-foreground focus-visible:ring-0"
-        />
-      </div>
+      <form.Field
+        name="merchant"
+        validators={{
+          onBlur: receiptFormSchema.shape.merchant,
+          onSubmit: receiptFormSchema.shape.merchant,
+        }}
+      >
+        {(field) => (
+          <FieldGroup>
+            <Field field={field} className="space-y-1.5">
+              <FieldLabel className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Merchant
+              </FieldLabel>
+              <Input
+                placeholder="e.g. Whole Foods Market"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
+                required
+                aria-invalid={isFieldInvalid(field) || undefined}
+                className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 text-sm focus-visible:border-foreground focus-visible:ring-0"
+              />
+              <FieldError>{getFieldErrorText(field)}</FieldError>
+            </Field>
+          </FieldGroup>
+        )}
+      </form.Field>
 
-      {/* Amount + Currency + Date */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="space-y-1.5">
-          <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Amount
-          </Label>
-          <div className="relative">
-            <span className="absolute left-0 top-1/2 inline-flex min-w-8 -translate-y-1/2 items-center font-mono text-xs text-muted-foreground">
-              {amountAdornment}
-            </span>
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0.00"
-              value={values.amount}
-              onChange={set('amount')}
-              required
-              className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent pr-0 pl-10 text-sm font-mono focus-visible:border-foreground focus-visible:ring-0"
-            />
-          </div>
-        </div>
-        <div className="space-y-1.5">
-          <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Currency
-          </Label>
-          <Select
-            value={values.currency}
-            onValueChange={(currency) => setValues((prev) => ({ ...prev, currency }))}
-          >
-            <SelectTrigger className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 text-sm focus:border-foreground focus:ring-0">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {currencyOptions.map((currency) => (
-                <SelectItem key={currency} value={currency}>
-                  {CURRENCY_LABELS[currency] ?? currency}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Date
-          </Label>
-          <DatePicker
-            value={values.date}
-            onChange={(date) => setValues((prev) => ({ ...prev, date }))}
-          />
-        </div>
-      </div>
-
-      {/* Category */}
-      <div className="space-y-1.5">
-        <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Category
-        </Label>
-        <Select
-          value={values.category}
-          onValueChange={(v) => setValues((prev) => ({ ...prev, category: v as ReceiptCategory }))}
+        <form.Field
+          name="amount"
+          validators={{
+            onBlur: receiptFormSchema.shape.amount,
+            onSubmit: receiptFormSchema.shape.amount,
+          }}
         >
-          <SelectTrigger className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 text-sm focus:border-foreground focus:ring-0">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {CATEGORIES.map((c) => (
-              <SelectItem key={c.value} value={c.value}>
-                {c.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          {(field) => (
+            <Field field={field} className="space-y-1.5">
+              <FieldLabel className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Amount
+              </FieldLabel>
+              <div className="relative">
+                <span className="absolute left-0 top-1/2 inline-flex min-w-8 -translate-y-1/2 items-center font-mono text-xs text-muted-foreground">
+                  {amountAdornment}
+                </span>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  required
+                  aria-invalid={isFieldInvalid(field) || undefined}
+                  className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent pr-0 pl-10 text-sm font-mono focus-visible:border-foreground focus-visible:ring-0"
+                />
+              </div>
+              <FieldError>{getFieldErrorText(field)}</FieldError>
+            </Field>
+          )}
+        </form.Field>
+        <form.Field
+          name="currency"
+          validators={{
+            onBlur: receiptFormSchema.shape.currency,
+            onSubmit: receiptFormSchema.shape.currency,
+          }}
+        >
+          {(field) => (
+            <Field field={field} className="space-y-1.5">
+              <FieldLabel className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Currency
+              </FieldLabel>
+              <Select value={field.state.value} onValueChange={field.handleChange}>
+                <SelectTrigger
+                  aria-invalid={isFieldInvalid(field) || undefined}
+                  className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 text-sm focus:border-foreground focus:ring-0"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {currencyOptions.map((currency) => (
+                    <SelectItem key={currency} value={currency}>
+                      {CURRENCY_LABELS[currency] ?? currency}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FieldError>{getFieldErrorText(field)}</FieldError>
+            </Field>
+          )}
+        </form.Field>
+        <form.Field
+          name="date"
+          validators={{
+            onBlur: receiptFormSchema.shape.date,
+            onSubmit: receiptFormSchema.shape.date,
+          }}
+        >
+          {(field) => (
+            <Field field={field} className="space-y-1.5">
+              <FieldLabel className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Date
+              </FieldLabel>
+              <DatePicker
+                value={field.state.value}
+                onChange={field.handleChange}
+                className={isFieldInvalid(field) ? 'border-destructive text-destructive' : undefined}
+              />
+              <FieldError>{getFieldErrorText(field)}</FieldError>
+            </Field>
+          )}
+        </form.Field>
       </div>
 
-      {/* Payment method */}
-      <div className="space-y-1.5">
-        <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Payment Method
-        </Label>
-        <div className="flex gap-2">
-          {PAYMENT_METHODS.map((pm) => (
-            <Button
-              key={pm.value}
-              type="button"
-              variant={values.paymentMethod === pm.value ? 'default' : 'outline'}
-              onClick={() => setValues((prev) => ({ ...prev, paymentMethod: pm.value }))}
-              className={`flex-1 font-mono text-xs uppercase tracking-wider ${
-                values.paymentMethod === pm.value
-                  ? 'bg-brand text-brand-foreground hover:bg-brand/90'
-                  : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
-              }`}
+      <form.Field
+        name="category"
+        validators={{
+          onSubmit: receiptFormSchema.shape.category,
+        }}
+      >
+        {(field) => (
+          <Field field={field} className="space-y-1.5">
+            <FieldLabel className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              Category
+            </FieldLabel>
+            <Select
+              value={field.state.value}
+              onValueChange={(value) => field.handleChange(value as ReceiptFormValues['category'])}
             >
-              {pm.label}
-            </Button>
-          ))}
-        </div>
-      </div>
+              <SelectTrigger
+                aria-invalid={isFieldInvalid(field) || undefined}
+                className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 text-sm focus:border-foreground focus:ring-0"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {RECEIPT_CATEGORIES.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {RECEIPT_CATEGORY_LABELS[category]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldError>{getFieldErrorText(field)}</FieldError>
+          </Field>
+        )}
+      </form.Field>
 
-      {/* Notes */}
-      <div className="space-y-1.5">
-        <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Notes
-        </Label>
-        <Textarea
-          placeholder="Optional notes..."
-          value={values.notes}
-          onChange={set('notes')}
-          rows={3}
-          className="resize-none border border-border bg-transparent text-sm focus-visible:border-foreground focus-visible:ring-0"
-        />
-      </div>
+      <form.Field
+        name="paymentMethod"
+        validators={{
+          onSubmit: receiptFormSchema.shape.paymentMethod,
+        }}
+      >
+        {(field) => (
+          <Field field={field} className="space-y-1.5">
+            <FieldLabel className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              Payment Method
+            </FieldLabel>
+            <div className="flex gap-2">
+              {PAYMENT_METHODS.map((paymentMethod) => (
+                <Button
+                  key={paymentMethod}
+                  type="button"
+                  variant={field.state.value === paymentMethod ? 'default' : 'outline'}
+                  onClick={() => field.handleChange(paymentMethod)}
+                  className={`flex-1 font-mono text-xs uppercase tracking-wider ${
+                    field.state.value === paymentMethod
+                      ? 'bg-brand text-brand-foreground hover:bg-brand/90'
+                      : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
+                  }`}
+                >
+                  {PAYMENT_METHOD_LABELS[paymentMethod]}
+                </Button>
+              ))}
+            </div>
+            <FieldError>{getFieldErrorText(field)}</FieldError>
+          </Field>
+        )}
+      </form.Field>
+
+      <form.Field name="notes">
+        {(field) => (
+          <Field field={field} className="space-y-1.5">
+            <FieldLabel className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              Notes
+            </FieldLabel>
+            <Textarea
+              placeholder="Optional notes..."
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(event) => field.handleChange(event.target.value)}
+              rows={3}
+              className="resize-none border border-border bg-transparent text-sm focus-visible:border-foreground focus-visible:ring-0"
+            />
+            <FieldError>{getFieldErrorText(field)}</FieldError>
+          </Field>
+        )}
+      </form.Field>
 
       {/* Submit */}
       <Button
@@ -317,6 +409,18 @@ function normalizeReceiptDate(value?: string | null) {
   }
 
   return parsed.toISOString().slice(0, 10)
+}
+
+function getReceiptFormValues(receipt: Receipt): ReceiptFormValues {
+  return {
+    merchant: receipt.merchant,
+    amount: receipt.amount.toFixed(2),
+    currency: receipt.currency,
+    date: receipt.date,
+    category: receipt.category,
+    paymentMethod: receipt.paymentMethod,
+    notes: receipt.notes ?? '',
+  }
 }
 
 function formatMoney(amount?: number | null, currency = 'TRY') {

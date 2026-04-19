@@ -1,4 +1,12 @@
-export { extractedReceiptSchema, optimizerRequestSchema, type ExtractedReceipt } from './schema.js'
-export { registerReceiptRoutes } from './routes.js'
-export { createOptimizerAnalysis, type OptimizerResponse, type OptimizerSuggestion } from './optimizer-analysis.js'
+export { extractedReceiptSchema, type ExtractedReceipt } from './schema.js'
+export {
+  createReceiptHandler,
+  dashboardHandler,
+  deleteReceiptHandler,
+  extractReceiptHandler,
+  getReceiptHandler,
+  listReceiptsHandler,
+  updateReceiptHandler,
+} from './handler.js'
+export { dashboardRoutes, receiptsRoutes } from './routes.js'
 export { generateSeedReceipts, seededUserId, summarizeSeedReceipts } from './seed-data.js'
