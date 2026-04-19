@@ -7,10 +7,10 @@
   },
   "scripts": {
     "dev": "dotenv -e .env.local -- sh -c \"NODE_OPTIONS='--import ./instrument.server.mjs' vite dev --port 3000 --strictPort\"",
-    "build": "vite build && mkdir -p dist/server && cp instrument.server.mjs dist/server",
+    "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "start": "NODE_ENV=production node --import ./dist/server/instrument.server.mjs dist/server/server.js"
+    "start": "NODE_ENV=production node --import ./instrument.server.mjs .output/server/index.mjs"
   },
   "dependencies": {
     "@sentry/tanstackstart-react": "^10.42.0",
@@ -56,6 +56,7 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.1.4",
     "jsdom": "^28.1.0",
+    "nitro": "3.0.260415-beta",
     "typescript": "^5.7.2",
     "vite": "^7.3.1",
     "vite-tsconfig-paths": "^5.1.4",
