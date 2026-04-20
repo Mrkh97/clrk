@@ -1,11 +1,11 @@
 import { useMutation } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 import { z } from 'zod'
 import {
   getConfirmEmailCallbackURL,
   getSafeRedirectTarget,
   signUp,
 } from '#/lib/auth-client'
-import { router } from '#/router'
 
 export const registerFormSchema = z.object({
   name: z.string().trim().min(1, 'Name is required.'),
@@ -16,6 +16,8 @@ export const registerFormSchema = z.object({
 type RegisterMutationVariables = z.infer<typeof registerFormSchema>
 
 export function useRegisterMutation() {
+  const router = useRouter()
+
   return useMutation({
     mutationKey: ['auth', 'register'],
     mutationFn: async (values: RegisterMutationVariables) => {

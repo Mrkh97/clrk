@@ -1,0 +1,10 @@
+[    5403ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://www.clrk.app/assets/styles-D6RktcAg.css:0
+[    5477ms] Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at Yn (https://www.clrk.app/assets/main-BrC_EF7A.js:9:31358)
+    at Qp (https://www.clrk.app/assets/main-BrC_EF7A.js:9:82688)
+    at Em (https://www.clrk.app/assets/main-BrC_EF7A.js:9:116957)
+    at Bb (https://www.clrk.app/assets/main-BrC_EF7A.js:9:116929)
+    at Nb (https://www.clrk.app/assets/main-BrC_EF7A.js:9:116784)
+    at gm (https://www.clrk.app/assets/main-BrC_EF7A.js:9:112272)
+    at Nm (https://www.clrk.app/assets/main-BrC_EF7A.js:9:124428)
+    at MessagePort.ee (https://www.clrk.app/assets/main-BrC_EF7A.js:2:10429)

@@ -1,8 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 import { signOut } from '#/lib/auth-client'
-import { router } from '#/router'
 
 export function useSignOutMutation() {
+  const router = useRouter()
+
   return useMutation({
     mutationKey: ['auth', 'sign-out'],
     mutationFn: async () => {

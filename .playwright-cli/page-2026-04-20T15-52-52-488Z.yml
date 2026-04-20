@@ -1,0 +1,180 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: clrk
+      - generic [ref=e6]:
+        - link "Features" [ref=e7] [cursor=pointer]:
+          - /url: "#features"
+        - link "How It Works" [ref=e8] [cursor=pointer]:
+          - /url: "#how-it-works"
+      - generic [ref=e9]:
+        - 'button "Theme mode: auto (system). Click to switch to light mode." [ref=e10]':
+          - img [ref=e11]
+        - 'button "Theme mode: auto (system). Click to switch to light mode." [ref=e13]':
+          - img [ref=e14]
+          - text: Auto
+        - link "JoinGet Started" [ref=e16] [cursor=pointer]:
+          - /url: /register
+  - generic [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]: Personal Finance, Reimagined
+      - heading "Let Us Manage Your Money" [level=1] [ref=e20]:
+        - text: Let Us Manage
+        - text: Your Money
+      - paragraph [ref=e21]: Track spending, scan receipts with AI, and discover exactly where to cut costs. clrk gives you the clarity to take control of your finances.
+      - generic [ref=e22]:
+        - link "Get Started Free" [ref=e23] [cursor=pointer]:
+          - /url: /register
+          - text: Get Started Free
+          - img [ref=e24]
+        - link "See How It Works" [ref=e26] [cursor=pointer]:
+          - /url: "#features"
+    - generic [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - paragraph [ref=e31]: Total Spent
+          - paragraph [ref=e32]: $4,280
+        - generic [ref=e33]:
+          - paragraph [ref=e34]: Avg. Daily
+          - paragraph [ref=e35]: $68.30
+        - generic [ref=e36]:
+          - paragraph [ref=e37]: Top Category
+          - paragraph [ref=e38]: Food
+        - generic [ref=e39]:
+          - paragraph [ref=e40]: Transactions
+          - paragraph [ref=e41]: "127"
+      - application [ref=e44]
+  - generic [ref=e53]:
+    - generic [ref=e54]:
+      - paragraph [ref=e55]: 10,000+
+      - paragraph [ref=e56]: Active Users
+    - generic [ref=e57]:
+      - paragraph [ref=e58]: 1M+
+      - paragraph [ref=e59]: Receipts Scanned
+    - generic [ref=e60]:
+      - paragraph [ref=e61]: $2.4M+
+      - paragraph [ref=e62]: Savings Found
+  - generic [ref=e64]:
+    - generic [ref=e65]:
+      - paragraph [ref=e66]: Features
+      - heading "Everything You Need" [level=2] [ref=e67]
+      - paragraph [ref=e68]: Three powerful tools working together to give you complete control over your finances.
+    - generic [ref=e69]:
+      - generic [ref=e70]:
+        - generic [ref=e71]:
+          - img [ref=e72]
+          - text: Dashboard
+        - heading "See Where Every Dollar Goes" [level=3] [ref=e77]
+        - paragraph [ref=e78]: Real-time spending analytics with interactive charts, category breakdowns, and transaction history. Know your financial habits at a glance.
+        - list [ref=e79]:
+          - listitem [ref=e80]: Interactive spending charts by period
+          - listitem [ref=e81]: Category-wise breakdowns with visual bars
+          - listitem [ref=e82]: Full transaction history with search
+      - generic [ref=e84]:
+        - paragraph [ref=e85]: Spending Overview
+        - generic [ref=e86]:
+          - generic [ref=e87]:
+            - paragraph [ref=e88]: Total Spent
+            - paragraph [ref=e89]: $4,280
+          - generic [ref=e90]:
+            - paragraph [ref=e91]: Avg. Daily
+            - paragraph [ref=e92]: $68.30
+          - generic [ref=e93]:
+            - paragraph [ref=e94]: Top Category
+            - paragraph [ref=e95]: Food
+          - generic [ref=e96]:
+            - paragraph [ref=e97]: Transactions
+            - paragraph [ref=e98]: "127"
+        - generic [ref=e99]:
+          - generic [ref=e101]:
+            - text: Food & Dining
+            - generic [ref=e102]: 30%
+          - generic [ref=e104]:
+            - text: Transport
+            - generic [ref=e105]: 20%
+          - generic [ref=e107]:
+            - text: Entertainment
+            - generic [ref=e108]: 15%
+    - generic [ref=e109]:
+      - generic [ref=e111]:
+        - generic [ref=e112]:
+          - img [ref=e114]
+          - paragraph [ref=e117]: Drop your receipt here
+          - paragraph [ref=e118]: JPG, PNG, PDF
+        - generic [ref=e119]: AI Extracted
+        - generic [ref=e120]:
+          - generic [ref=e121]: MerchantWhole Foods Market
+          - generic [ref=e122]: Amount$47.23
+          - generic [ref=e123]: CategoryFood & Dining
+      - generic [ref=e124]:
+        - generic [ref=e125]:
+          - img [ref=e126]
+          - text: Receipt Scanner
+        - heading "Snap It. Extract It. Done." [level=3] [ref=e129]
+        - paragraph [ref=e130]: Upload any receipt and our AI instantly extracts merchant, amount, date, and category. No manual entry required.
+        - list [ref=e131]:
+          - listitem [ref=e132]: AI-powered data extraction in seconds
+          - listitem [ref=e133]: Supports photos, scans, and PDF receipts
+          - listitem [ref=e134]: Auto-categorization with smart detection
+    - generic [ref=e135]:
+      - generic [ref=e136]:
+        - generic [ref=e137]:
+          - img [ref=e138]
+          - text: Optimizer
+        - heading "Cut Smarter, Not Harder" [level=3] [ref=e141]
+        - paragraph [ref=e142]: Choose your savings goal and our AI analyzes your habits to find actionable cuts. Save 10% with easy swaps or 30% with aggressive changes.
+        - list [ref=e143]:
+          - listitem [ref=e144]: "Two optimization levels: Easy (10%) and Hard (30%)"
+          - listitem [ref=e145]: AI-generated, personalized cut suggestions
+          - listitem [ref=e146]: See exact dollar impact per suggestion
+      - generic [ref=e148]:
+        - paragraph [ref=e149]: Choose Your Goal
+        - generic [ref=e150]:
+          - generic [ref=e151]:
+            - img [ref=e153]
+            - paragraph [ref=e155]: Easy
+            - paragraph [ref=e156]: 10%
+          - generic [ref=e157]:
+            - img [ref=e159]
+            - paragraph [ref=e161]: Hard
+            - paragraph [ref=e162]: 30%
+        - generic [ref=e163]:
+          - paragraph [ref=e164]: Potential Monthly Savings
+          - paragraph [ref=e165]: $428.00
+          - paragraph [ref=e166]: 10% of $4,280 monthly spend
+  - generic [ref=e168]:
+    - generic [ref=e169]:
+      - paragraph [ref=e170]: How It Works
+      - heading "Three Steps to Clarity" [level=2] [ref=e171]
+    - generic [ref=e172]:
+      - generic [ref=e173]:
+        - generic [ref=e174]: "1"
+        - heading "Connect" [level=3] [ref=e175]
+        - paragraph [ref=e176]: Link your accounts or start entering transactions manually. Takes less than a minute.
+      - generic [ref=e177]:
+        - generic [ref=e178]: "2"
+        - heading "Scan" [level=3] [ref=e179]
+        - paragraph [ref=e180]: Upload receipts and let AI handle the data entry. Just snap and go.
+      - generic [ref=e181]:
+        - generic [ref=e182]: "3"
+        - heading "Save" [level=3] [ref=e183]
+        - paragraph [ref=e184]: Get personalized spending insights and actionable savings suggestions.
+  - generic [ref=e186]:
+    - paragraph [ref=e187]: Ready?
+    - heading "Start Managing Your Money Today" [level=2] [ref=e188]
+    - paragraph [ref=e189]: Join thousands who have already taken control of their finances with clrk.
+    - link "Get Started Free" [ref=e191] [cursor=pointer]:
+      - /url: /dashboard
+      - text: Get Started Free
+      - img [ref=e192]
+  - contentinfo [ref=e194]:
+    - generic [ref=e196]:
+      - generic [ref=e197]: clrk
+      - generic [ref=e198]:
+        - link "Features" [ref=e199] [cursor=pointer]:
+          - /url: "#features"
+        - link "How It Works" [ref=e200] [cursor=pointer]:
+          - /url: "#how-it-works"
+        - link "Dashboard" [ref=e201] [cursor=pointer]:
+          - /url: /dashboard
+      - paragraph [ref=e202]: © 2026 clrk. All rights reserved.

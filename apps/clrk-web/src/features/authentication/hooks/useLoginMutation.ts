@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 import { z } from 'zod'
 import {
   authClient,
@@ -7,7 +8,6 @@ import {
   getSafeRedirectTarget,
   signIn,
 } from '#/lib/auth-client'
-import { router } from '#/router'
 
 export const loginFormSchema = z.object({
   email: z.email('Enter a valid email address.'),
@@ -18,6 +18,8 @@ interface LoginMutationVariables extends z.infer<typeof loginFormSchema> {
 }
 
 export function useLoginMutation() {
+  const router = useRouter()
+
   return useMutation({
     mutationKey: ['auth', 'login'],
     mutationFn: async (values: LoginMutationVariables) => {
