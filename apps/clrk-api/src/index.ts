@@ -5,7 +5,6 @@ import {
   authenticationRoutes,
   authSessionMiddleware,
   type AppEnv,
-  verifyEmailHandler,
 } from './features/authentication/index.js'
 import { optimizerRoutes } from './features/optimizer/index.js'
 import { dashboardRoutes, receiptsRoutes } from './features/receipts/index.js'
@@ -22,7 +21,6 @@ const corsOptions = {
 }
 
 api.use('*', cors(corsOptions))
-app.use('/verify-email', cors(corsOptions))
 
 app.use('*', authSessionMiddleware)
 
@@ -31,8 +29,6 @@ app.get('/', (c) => {
     message: 'clrk api ready',
   })
 })
-
-app.get('/verify-email', verifyEmailHandler)
 
 api.get('/health', (c) => {
   return c.json({

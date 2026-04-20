@@ -241,7 +241,11 @@ export function appendVerifiedSearch(target: string) {
 
 export async function verifyEmailToken(token: string) {
   try {
-    const verificationUrl = new URL('/verify-email', getAuthBaseUrl())
+    const authBaseUrl = getAuthBaseUrl()
+    const verificationUrl = new URL(
+      'verify-email',
+      authBaseUrl.endsWith('/') ? authBaseUrl : `${authBaseUrl}/`,
+    )
 
     verificationUrl.searchParams.set('token', token)
 

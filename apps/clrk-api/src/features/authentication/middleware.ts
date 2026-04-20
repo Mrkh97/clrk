@@ -8,7 +8,6 @@ export function isPublicVerificationPath(path: string) {
   return (
     path === `${API_BASE_PATH}/health`
     || path.startsWith(`${API_BASE_PATH}/auth/`)
-    || path === '/verify-email'
   )
 }
 

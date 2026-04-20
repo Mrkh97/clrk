@@ -5,7 +5,3 @@ import type { AppEnv } from './middleware.js'
 export const authHandler: Handler<AppEnv> = (c) => {
   return auth.handler(c.req.raw)
 }
-
-export const verifyEmailHandler: Handler<AppEnv> = (c) => {
-  return auth.handler(c.req.raw)
-}
