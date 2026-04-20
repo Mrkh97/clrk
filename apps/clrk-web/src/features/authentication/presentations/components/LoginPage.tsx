@@ -1,4 +1,4 @@
-import { Link, useSearch } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useForm, useStore } from '@tanstack/react-form'
 import { useMemo, useState } from 'react'
 import { z } from 'zod'
@@ -8,6 +8,7 @@ import { Field, FieldError, FieldLabel, getFieldErrorText, isFieldInvalid } from
 import { Input } from '#/components/ui/input'
 import {
   authClient,
+  getAuthSession,
   getConfirmEmailCallbackURL,
   getConfirmEmailRedirectTarget,
   getSafeRedirectTarget,
@@ -21,6 +22,7 @@ const loginFormSchema = z.object({
 
 export default function LoginPage() {
   const search = useSearch({ from: '/login' })
+  const navigate = useNavigate({ from: '/login' })
   const redirectTarget = useMemo(
     () => getSafeRedirectTarget(search.redirect),
     [search.redirect],
@@ -44,7 +46,7 @@ export default function LoginPage() {
         return
       }
 
-      const { data: session } = await authClient.getSession()
+      const session = await getAuthSession()
 
       if (session && !session.user.emailVerified) {
         const resendResult = await authClient.sendVerificationEmail({
@@ -62,11 +64,17 @@ export default function LoginPage() {
           confirmEmailUrl.searchParams.set('resent', '1')
         }
 
-        window.location.assign(`${confirmEmailUrl.pathname}${confirmEmailUrl.search}`)
+        await navigate({
+          href: `${confirmEmailUrl.pathname}${confirmEmailUrl.search}`,
+          replace: true,
+        })
         return
       }
 
-      window.location.assign(redirectTarget)
+      await navigate({
+        to: redirectTarget,
+        replace: true,
+      })
     },
   })
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting)

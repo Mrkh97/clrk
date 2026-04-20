@@ -125,9 +125,15 @@ export const authClient = createAuthClient({
 export const { signIn, signOut, signUp } = authClient
 
 type RawSession = typeof authClient.$Infer.Session
+type RawSessionInfo = RawSession['session']
+type GetSessionOptions = Parameters<typeof authClient.getSession>[0]
 
 export type AuthUser = RawSession['user']
-export type AuthSession = RawSession
+export type AuthSessionInfo = Omit<RawSessionInfo, 'token' | 'ipAddress' | 'userAgent'>
+export type AuthSession = {
+  user: AuthUser
+  session: AuthSessionInfo
+}
 
 export const defaultRedirectTarget = '/dashboard'
 export const confirmEmailPath = '/confirm-email'
@@ -162,12 +168,32 @@ export function getConfirmEmailCallbackURL(redirect?: string) {
   return new URL(target, window.location.origin).toString()
 }
 
-function normalizeSession(session: RawSession | null | undefined): AuthSession | null {
+export function toAuthSession(session: RawSession | null | undefined): AuthSession | null {
   if (!session) {
     return null
   }
 
-  return session
+  const {
+    token: _token,
+    ipAddress: _ipAddress,
+    userAgent: _userAgent,
+    ...publicSession
+  } = session.session
+
+  return {
+    user: session.user,
+    session: publicSession,
+  }
+}
+
+export async function getAuthSession(options?: GetSessionOptions) {
+  const { data, error } = await authClient.getSession(options)
+
+  if (error) {
+    return null
+  }
+
+  return toAuthSession(data)
 }
 
 export function useAuthSession() {
@@ -175,6 +201,6 @@ export function useAuthSession() {
 
   return {
     ...session,
-    data: normalizeSession(session.data),
+    data: toAuthSession(session.data),
   }
 }

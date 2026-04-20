@@ -1,23 +1,25 @@
 import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeader } from '@tanstack/react-start/server'
-import { authClient, getConfirmEmailRedirectTarget } from './auth-client'
+import { getAuthSession, getConfirmEmailRedirectTarget } from './auth-client'
 
-export const getCurrentSession = createServerFn({ method: 'GET' }).handler(async () => {
+const getCurrentSessionServer = createServerFn({ method: 'GET' }).handler(async () => {
   const cookie = getRequestHeader('cookie')
 
-  const { data, error } = await authClient.getSession({
+  return getAuthSession({
     fetchOptions: {
       headers: cookie ? { cookie } : undefined,
     },
   })
+})
 
-  if (error) {
-    return null
+export async function getCurrentSession() {
+  if (typeof window !== 'undefined') {
+    return getAuthSession()
   }
 
-  return data
-})
+  return getCurrentSessionServer()
+}
 
 export async function requireSession(redirectTarget: string) {
   const session = await getCurrentSession()

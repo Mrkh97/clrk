@@ -1,4 +1,4 @@
-import { Link, useSearch } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useForm, useStore } from '@tanstack/react-form'
 import { useMemo, useState } from 'react'
 import { z } from 'zod'
@@ -21,6 +21,7 @@ const registerFormSchema = z.object({
 
 export default function RegisterPage() {
   const search = useSearch({ from: '/register' })
+  const navigate = useNavigate({ from: '/register' })
   const redirectTarget = useMemo(
     () => getSafeRedirectTarget(search.redirect),
     [search.redirect],
@@ -49,7 +50,10 @@ export default function RegisterPage() {
         return
       }
 
-      window.location.assign(getConfirmEmailRedirectTarget(redirectTarget))
+      await navigate({
+        href: getConfirmEmailRedirectTarget(redirectTarget),
+        replace: true,
+      })
     },
   })
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting)

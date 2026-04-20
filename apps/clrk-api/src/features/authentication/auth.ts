@@ -1,8 +1,9 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { customSession } from 'better-auth/plugins'
 import { db } from '@/db/index.js'
 import * as schema from '@/db/schema.js'
-import { env, getTrustedOrigins } from '@/lib/env.js'
+import { env, getCrossSubDomainCookiesConfig, getTrustedOrigins } from '@/lib/env.js'
 import { sendVerificationEmail } from './email.js'
 
 export const auth = betterAuth({
@@ -16,6 +17,9 @@ export const auth = betterAuth({
     provider: 'pg',
     schema,
   }),
+  advanced: {
+    crossSubDomainCookies: getCrossSubDomainCookiesConfig(),
+  },
   emailAndPassword: {
     enabled: true,
   },
@@ -40,6 +44,21 @@ export const auth = betterAuth({
       },
     },
   },
+  plugins: [
+    customSession(async ({ user, session }) => {
+      const {
+        token: _token,
+        ipAddress: _ipAddress,
+        userAgent: _userAgent,
+        ...publicSession
+      } = session
+
+      return {
+        user,
+        session: publicSession,
+      }
+    }),
+  ],
 })
 
 export type AuthSession = typeof auth.$Infer.Session
