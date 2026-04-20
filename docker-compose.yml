@@ -47,6 +47,7 @@ services:
       NODE_ENV: production
       PORT: 3001
       WEB_ORIGIN: ${WEB_ORIGIN:?WEB_ORIGIN is required}
+      WEB_ORIGIN_SECONDARY: ${WEB_ORIGIN_SECONDARY:-}
       DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:?POSTGRES_DB is required}
       REDIS_URL: redis://redis:6379
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:?BETTER_AUTH_URL is required}

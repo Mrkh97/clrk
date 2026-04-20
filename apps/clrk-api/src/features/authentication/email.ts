@@ -1,5 +1,5 @@
 import { Resend } from 'resend'
-import { env } from '@/lib/env.js'
+import { env, getConfiguredWebOrigins } from '@/lib/env.js'
 
 let resendClient: Resend | null = null
 const defaultRedirectTarget = '/dashboard'
@@ -46,9 +46,9 @@ export function getVerificationEmailRedirectTarget(callbackURL?: string | null) 
 
   try {
     const parsedCallbackUrl = new URL(callbackURL, env.WEB_ORIGIN)
-    const webOrigin = new URL(env.WEB_ORIGIN).origin
+    const webOrigins = new Set(getConfiguredWebOrigins().map((origin) => new URL(origin).origin))
 
-    if (parsedCallbackUrl.origin !== webOrigin) {
+    if (!webOrigins.has(parsedCallbackUrl.origin)) {
       return defaultRedirectTarget
     }
 

@@ -10,6 +10,7 @@ const optionalEnvString = z.preprocess(
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3001),
   WEB_ORIGIN: z.string().url().default('http://localhost:3000'),
+  WEB_ORIGIN_SECONDARY: optionalEnvString.pipe(z.string().url().optional()),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   BETTER_AUTH_URL: z.string().url().default('http://localhost:3001'),
   BETTER_AUTH_SECRET: z.string().min(1, 'BETTER_AUTH_SECRET is required'),
@@ -32,12 +33,19 @@ if (!parsedEnv.success) {
 
 export const env = parsedEnv.data
 
+export function getConfiguredWebOrigins() {
+  return [
+    env.WEB_ORIGIN,
+    ...(env.WEB_ORIGIN_SECONDARY ? [env.WEB_ORIGIN_SECONDARY] : []),
+  ]
+}
+
 export function isAllowedWebOrigin(origin: string | undefined | null) {
   if (!origin) {
     return false
   }
 
-  if (origin === env.WEB_ORIGIN) {
+  if (getConfiguredWebOrigins().includes(origin)) {
     return true
   }
 
@@ -51,7 +59,7 @@ export function isAllowedWebOrigin(origin: string | undefined | null) {
 }
 
 export function getTrustedOrigins(origin?: string | null) {
-  const trustedOrigins = new Set([env.WEB_ORIGIN])
+  const trustedOrigins = new Set(getConfiguredWebOrigins())
 
   if (isAllowedWebOrigin(origin)) {
     trustedOrigins.add(origin!)
