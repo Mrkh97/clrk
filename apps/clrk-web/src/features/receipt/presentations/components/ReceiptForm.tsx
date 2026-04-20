@@ -38,11 +38,20 @@ const CURRENCY_LABELS: Record<string, string> = {
   JPY: 'Japanese Yen (¥)',
 }
 
+function getTodayDateString() {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = `${today.getMonth() + 1}`.padStart(2, '0')
+  const day = `${today.getDate()}`.padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
 const defaultValues: ReceiptFormValues = {
   merchant: '',
   amount: '',
   currency: 'TRY',
-  date: new Date().toISOString().split('T')[0],
+  date: '',
   category: 'food',
   paymentMethod: 'card',
   notes: '',
@@ -102,6 +111,20 @@ export default function ReceiptForm() {
     },
   })
   const values = useStore(form.store, (state) => state.values)
+
+  useEffect(() => {
+    if (isEditing || extractedReceipt || values.date) {
+      return
+    }
+
+    form.reset(
+      {
+        ...values,
+        date: getTodayDateString(),
+      },
+      { keepDefaultValues: true },
+    )
+  }, [extractedReceipt, form, isEditing, values])
 
   useEffect(() => {
     if (!selectedReceipt) {

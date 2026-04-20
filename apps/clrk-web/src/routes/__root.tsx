@@ -1,5 +1,6 @@
 import {
   HeadContent,
+  Link,
   Scripts,
   createRootRouteWithContext,
 } from "@tanstack/react-router";
@@ -38,6 +39,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
+  notFoundComponent: NotFoundPage,
   shellComponent: RootDocument,
 });
 
@@ -48,7 +50,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
+      <body
+        suppressHydrationWarning
+        className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]"
+      >
         {children}
         <TanStackDevtools
           config={{
@@ -65,5 +70,29 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
+  );
+}
+
+function NotFoundPage() {
+  return (
+    <main className="flex min-h-screen items-center justify-center px-6">
+      <div className="max-w-md text-center">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Not Found
+        </p>
+        <h1 className="mt-3 font-display text-3xl font-bold text-foreground">
+          That page does not exist.
+        </h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          The link may be outdated, or the page may have moved.
+        </p>
+        <Link
+          to="/"
+          className="mt-6 inline-flex rounded-full bg-brand px-5 py-2 font-mono text-[10px] font-bold uppercase tracking-widest text-brand-foreground transition-colors hover:bg-brand/90"
+        >
+          Go Home
+        </Link>
+      </div>
+    </main>
   );
 }

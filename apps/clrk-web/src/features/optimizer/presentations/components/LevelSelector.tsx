@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Zap, Flame } from 'lucide-react'
 import { CardContent } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
@@ -7,6 +8,7 @@ import GlassCard from '#/components/GlassCard'
 import { useOptimizerStore } from '../../stores/useOptimizerStore'
 import { useOptimize } from '../../hooks/useOptimize'
 import type { OptimizationLevel } from '../../types'
+import { getDefaultDateRange } from '../../stores/useOptimizerStore'
 
 const LEVELS = [
   {
@@ -28,7 +30,24 @@ const LEVELS = [
 export default function LevelSelector() {
   const { selectedLevel, selectLevel, fromDate, toDate, setFromDate, setToDate } = useOptimizerStore()
   const { mutate } = useOptimize()
+  const hasCompleteRange = Boolean(fromDate && toDate)
   const hasValidRange = Boolean(fromDate && toDate && fromDate <= toDate)
+
+  useEffect(() => {
+    if (fromDate && toDate) {
+      return
+    }
+
+    const defaultDateRange = getDefaultDateRange()
+
+    if (!fromDate) {
+      setFromDate(defaultDateRange.fromDate)
+    }
+
+    if (!toDate) {
+      setToDate(defaultDateRange.toDate)
+    }
+  }, [fromDate, setFromDate, setToDate, toDate])
 
   return (
     <div className="space-y-8">
@@ -59,7 +78,7 @@ export default function LevelSelector() {
         </div>
       </div>
 
-      {!hasValidRange ? (
+      {hasCompleteRange && !hasValidRange ? (
         <p className="text-center font-mono text-[10px] uppercase tracking-widest text-destructive">
           The start date must be on or before the end date.
         </p>

@@ -17,7 +17,7 @@ interface OptimizerStore {
   reset: () => void
 }
 
-function getDefaultDateRange() {
+export function getDefaultDateRange() {
   const today = new Date()
   const toDate = today.toISOString().slice(0, 10)
   const fromDate = new Date(today)
@@ -30,7 +30,8 @@ function getDefaultDateRange() {
 }
 
 export const useOptimizerStore = create<OptimizerStore>((set) => ({
-  ...getDefaultDateRange(),
+  fromDate: '',
+  toDate: '',
   phase: 'idle',
   selectedLevel: null,
   result: null,
