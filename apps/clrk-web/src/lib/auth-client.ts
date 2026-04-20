@@ -137,6 +137,65 @@ export type AuthSession = {
 
 export const defaultRedirectTarget = '/dashboard'
 export const confirmEmailPath = '/confirm-email'
+const verifiedSearchParam = 'verified'
+
+function isAbsoluteUrl(value: string) {
+  return value.startsWith('http://') || value.startsWith('https://')
+}
+
+function joinUrlPaths(basePath: string, nextPath: string) {
+  const normalizedBasePath = basePath.replace(/\/+$/, '')
+  const normalizedNextPath = nextPath.startsWith('/') ? nextPath : `/${nextPath}`
+
+  if (!normalizedBasePath || normalizedBasePath === '/') {
+    return normalizedNextPath
+  }
+
+  return `${normalizedBasePath}${normalizedNextPath}`
+}
+
+function getAuthBaseUrl() {
+  if (typeof window !== 'undefined') {
+    if (isAbsoluteUrl(apiBaseUrl)) {
+      const url = new URL(apiBaseUrl)
+      const pathname = url.pathname.replace(/\/+$/, '')
+
+      if (!pathname || pathname === '/') {
+        url.pathname = '/api/auth'
+      } else if (!pathname.endsWith('/auth')) {
+        url.pathname = joinUrlPaths(pathname, '/auth')
+      }
+
+      return url.toString()
+    }
+
+    const resolvedBasePath = apiBaseUrl.replace(/\/+$/, '')
+    const authPath = resolvedBasePath.endsWith('/api')
+      ? `${resolvedBasePath}/auth`
+      : resolvedBasePath.endsWith('/auth')
+        ? resolvedBasePath
+      : resolvedBasePath
+        ? joinUrlPaths(resolvedBasePath, '/api/auth')
+        : '/api/auth'
+
+    return new URL(authPath, window.location.origin).toString()
+  }
+
+  if (isAbsoluteUrl(apiBaseUrl)) {
+    const url = new URL(apiBaseUrl)
+    const pathname = url.pathname.replace(/\/+$/, '')
+
+    if (!pathname || pathname === '/') {
+      url.pathname = '/api/auth'
+    } else if (!pathname.endsWith('/auth')) {
+      url.pathname = joinUrlPaths(pathname, '/auth')
+    }
+
+    return url.toString()
+  }
+
+  return apiBaseUrl
+}
 
 export function getSafeRedirectTarget(redirect?: string) {
   if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
@@ -166,6 +225,45 @@ export function getConfirmEmailCallbackURL(redirect?: string) {
   }
 
   return new URL(target, window.location.origin).toString()
+}
+
+export function getVerifiedSearchValue(verified?: string) {
+  return verified === '1' ? '1' : undefined
+}
+
+export function appendVerifiedSearch(target: string) {
+  const url = new URL(target, 'https://clrk.local')
+
+  url.searchParams.set(verifiedSearchParam, '1')
+
+  return `${url.pathname}${url.search}`
+}
+
+export async function verifyEmailToken(token: string) {
+  const verificationUrl = new URL('/verify-email', getAuthBaseUrl())
+
+  verificationUrl.searchParams.set('token', token)
+
+  const response = await fetch(verificationUrl.toString(), {
+    credentials: 'include',
+    headers: {
+      accept: 'application/json',
+    },
+  })
+
+  const payload = await response.json().catch(() => null) as
+    | { code?: string; message?: string }
+    | null
+
+  if (!response.ok) {
+    return {
+      error: payload?.code?.toLowerCase() ?? 'verification_failed',
+    }
+  }
+
+  return {
+    error: null,
+  }
 }
 
 export function toAuthSession(session: RawSession | null | undefined): AuthSession | null {

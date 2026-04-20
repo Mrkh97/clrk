@@ -1,9 +1,16 @@
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, CheckCircle2, MailCheck, RefreshCcw } from 'lucide-react'
 import AuthShell from '#/components/AuthShell'
 import { Button } from '#/components/ui/button'
-import { getSafeRedirectTarget, useAuthSession } from '#/lib/auth-client'
+import {
+  appendVerifiedSearch,
+  defaultRedirectTarget,
+  getAuthSession,
+  getSafeRedirectTarget,
+  useAuthSession,
+  verifyEmailToken,
+} from '#/lib/auth-client'
 import { useResendVerificationEmail } from '../../hooks/useResendVerificationEmail'
 
 function getErrorCopy(error?: string) {
@@ -26,6 +33,7 @@ export default function ConfirmEmailPage() {
   const navigate = useNavigate({ from: '/confirm-email' })
   const { data: session, isPending } = useAuthSession()
   const resendVerificationEmail = useResendVerificationEmail()
+  const [isVerifyingToken, setIsVerifyingToken] = useState(Boolean(search.token))
   const redirectTarget = useMemo(
     () => getSafeRedirectTarget(search.redirect),
     [search.redirect],
@@ -43,7 +51,12 @@ export default function ConfirmEmailPage() {
   let description = 'We need a verified email before opening the protected finance workspace.'
   let Icon = MailCheck
 
-  if (isVerified) {
+  if (isVerifyingToken) {
+    eyebrow = 'Verifying Email'
+    title = 'Confirming your account.'
+    description = 'We are validating your confirmation link and preparing the right next step.'
+    Icon = RefreshCcw
+  } else if (isVerified) {
     eyebrow = 'Email Verified'
     title = 'You are cleared to continue.'
     description = 'Your email is confirmed. Continue into the verified workspace.'
@@ -61,6 +74,70 @@ export default function ConfirmEmailPage() {
   } else if (isPending) {
     description = 'Loading your current verification state.'
   }
+
+  useEffect(() => {
+    const token = search.token
+
+    if (!token) {
+      setIsVerifyingToken(false)
+      return
+    }
+
+    let isMounted = true
+
+    const confirmEmail = async () => {
+      setIsVerifyingToken(true)
+
+      const verificationResult = await verifyEmailToken(token)
+
+      if (!isMounted) {
+        return
+      }
+
+      if (verificationResult.error) {
+        setIsVerifyingToken(false)
+        await navigate({
+          to: '/confirm-email',
+          search: redirectTarget === defaultRedirectTarget
+            ? { error: verificationResult.error }
+            : { error: verificationResult.error, redirect: redirectTarget },
+          replace: true,
+        })
+        return
+      }
+
+      const refreshedSession = await getAuthSession()
+
+      if (!isMounted) {
+        return
+      }
+
+      if (refreshedSession?.user.emailVerified) {
+        await navigate({
+          href: appendVerifiedSearch(defaultRedirectTarget),
+          replace: true,
+        })
+        return
+      }
+
+      const loginSearch = new URLSearchParams({ verified: '1' })
+
+      if (redirectTarget !== defaultRedirectTarget) {
+        loginSearch.set('redirect', redirectTarget)
+      }
+
+      await navigate({
+        href: `/login?${loginSearch.toString()}`,
+        replace: true,
+      })
+    }
+
+    void confirmEmail()
+
+    return () => {
+      isMounted = false
+    }
+  }, [navigate, redirectTarget, search.token])
 
   const handleResend = async () => {
     if (!session?.user.email || session.user.emailVerified) {
@@ -91,7 +168,7 @@ export default function ConfirmEmailPage() {
       title={title}
       description={description}
       footer={
-        isVerified ? (
+        isVerifyingToken ? null : isVerified ? (
           <>
             Ready to continue?{' '}
             <Link
@@ -106,7 +183,7 @@ export default function ConfirmEmailPage() {
             Need a different account?{' '}
             <Link
               to="/login"
-              search={search.redirect ? { redirect: search.redirect } : undefined}
+              search={search.redirect ? { redirect: search.redirect } : {}}
               className="font-medium text-foreground underline decoration-brand/40 underline-offset-4"
             >
               Sign in here
@@ -117,7 +194,7 @@ export default function ConfirmEmailPage() {
     >
       <div className="space-y-2">
         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand/12 text-brand">
-          <Icon size={18} />
+          <Icon size={18} className={isVerifyingToken ? 'animate-spin' : undefined} />
         </div>
         <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-muted-foreground">
           Verification Status
@@ -142,7 +219,7 @@ export default function ConfirmEmailPage() {
           </div>
         )}
 
-        {(hasResent || canResend) && !isVerified && (
+        {(hasResent || canResend) && !isVerified && !isVerifyingToken && (
           <Button
             type="button"
             onClick={handleResend}
@@ -157,7 +234,7 @@ export default function ConfirmEmailPage() {
           </Button>
         )}
 
-        {isVerified ? (
+        {isVerifyingToken ? null : isVerified ? (
           <Button
             asChild
             className="h-12 w-full rounded-full bg-brand font-mono text-xs font-bold uppercase tracking-[0.28em] text-brand-foreground hover:bg-brand/90"
@@ -172,7 +249,7 @@ export default function ConfirmEmailPage() {
           >
             <Link
               to="/login"
-              search={search.redirect ? { redirect: search.redirect } : undefined}
+              search={search.redirect ? { redirect: search.redirect } : {}}
             >
               {session ? 'Switch Account' : 'Log In'}
             </Link>

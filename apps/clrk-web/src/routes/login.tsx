@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { z } from 'zod'
 import {
+  getVerifiedSearchValue,
   getConfirmEmailRedirectTarget,
   getSafeRedirectTarget,
 } from '#/lib/auth-client'
@@ -9,6 +10,7 @@ import LoginPage from '#/features/authentication/presentations/components/LoginP
 
 const authSearchSchema = z.object({
   redirect: z.string().optional(),
+  verified: z.string().transform(getVerifiedSearchValue).optional(),
 })
 
 export const Route = createFileRoute('/login')({

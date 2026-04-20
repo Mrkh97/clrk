@@ -10,7 +10,6 @@ import {
   authClient,
   getAuthSession,
   getConfirmEmailCallbackURL,
-  getConfirmEmailRedirectTarget,
   getSafeRedirectTarget,
   signIn,
 } from '#/lib/auth-client'
@@ -53,28 +52,18 @@ export default function LoginPage() {
           email: session.user.email,
           callbackURL: getConfirmEmailCallbackURL(redirectTarget),
         })
-        const confirmEmailUrl = new URL(
-          getConfirmEmailRedirectTarget(redirectTarget),
-          window.location.origin,
-        )
-
-        if (resendResult.error) {
-          confirmEmailUrl.searchParams.set('error', 'resend_failed')
-        } else {
-          confirmEmailUrl.searchParams.set('resent', '1')
-        }
 
         await navigate({
-          href: `${confirmEmailUrl.pathname}${confirmEmailUrl.search}`,
+          to: '/confirm-email',
+          search: resendResult.error
+            ? { error: 'resend_failed', redirect: redirectTarget }
+            : { redirect: redirectTarget, resent: '1' },
           replace: true,
         })
         return
       }
 
-      await navigate({
-        to: redirectTarget,
-        replace: true,
-      })
+      window.location.replace(redirectTarget)
     },
   })
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting)
@@ -89,7 +78,7 @@ export default function LoginPage() {
           New to clrk?{' '}
           <Link
             to="/register"
-            search={search.redirect ? { redirect: search.redirect } : undefined}
+            search={search.redirect ? { redirect: search.redirect } : {}}
             className="font-medium text-foreground underline decoration-brand/40 underline-offset-4"
           >
             Create an account
@@ -115,6 +104,12 @@ export default function LoginPage() {
         }}
         className="mt-8 space-y-5"
       >
+        {search.verified === '1' && (
+          <div className="rounded-2xl border border-brand/30 bg-brand/10 px-4 py-3 text-sm text-foreground">
+            Your email is verified. Sign in to continue.
+          </div>
+        )}
+
         <form.Field
           name="email"
           validators={{

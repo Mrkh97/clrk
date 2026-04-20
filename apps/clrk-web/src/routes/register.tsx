@@ -3,12 +3,14 @@ import { z } from 'zod'
 import {
   getConfirmEmailRedirectTarget,
   getSafeRedirectTarget,
+  getVerifiedSearchValue,
 } from '#/lib/auth-client'
 import { getCurrentSession } from '#/lib/session'
 import RegisterPage from '#/features/authentication/presentations/components/RegisterPage'
 
 const authSearchSchema = z.object({
   redirect: z.string().optional(),
+  verified: z.string().transform(getVerifiedSearchValue).optional(),
 })
 
 export const Route = createFileRoute('/register')({

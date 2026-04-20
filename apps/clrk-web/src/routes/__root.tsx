@@ -1,6 +1,7 @@
 import {
   HeadContent,
   Link,
+  ScriptOnce,
   Scripts,
   createRootRouteWithContext,
 } from "@tanstack/react-router";
@@ -63,7 +64,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <ScriptOnce>{THEME_INIT_SCRIPT}</ScriptOnce>
         <HeadContent />
       </head>
       <body

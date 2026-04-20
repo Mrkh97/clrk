@@ -6,6 +6,7 @@ const confirmEmailSearchSchema = z.object({
   error: z.string().optional(),
   redirect: z.string().optional(),
   resent: z.enum(['1']).optional(),
+  token: z.string().optional(),
 })
 
 export const Route = createFileRoute('/confirm-email')({

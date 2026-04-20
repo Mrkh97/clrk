@@ -159,12 +159,12 @@ export default function LandingPage() {
               className="bg-brand font-mono text-xs uppercase tracking-wider text-brand-foreground hover:bg-brand/90"
             >
               {isAuthenticated ? (
-                <Link to="/dashboard">
+                <Link to="/dashboard" search={{}}>
                   <span className="sm:hidden">Open</span>
                   <span className="hidden sm:inline">Open Dashboard</span>
                 </Link>
               ) : (
-                <Link to="/register">
+                <Link to="/register" search={{}}>
                   <span className="sm:hidden">Join</span>
                   <span className="hidden sm:inline">Get Started</span>
                 </Link>
@@ -216,12 +216,12 @@ export default function LandingPage() {
               className="w-full bg-brand font-mono text-xs font-bold uppercase tracking-widest text-brand-foreground hover:bg-brand/90 sm:w-auto"
             >
               {isAuthenticated ? (
-                <Link to="/dashboard">
+                <Link to="/dashboard" search={{}}>
                   Open Dashboard
                   <ArrowRight size={14} />
                 </Link>
               ) : (
-                <Link to="/register">
+                <Link to="/register" search={{}}>
                   Get Started Free
                   <ArrowRight size={14} />
                 </Link>
@@ -540,7 +540,7 @@ export default function LandingPage() {
               size="lg"
               className="bg-brand font-mono text-xs font-bold uppercase tracking-widest text-brand-foreground hover:bg-brand/90"
             >
-              <Link to="/dashboard">
+              <Link to="/dashboard" search={{}}>
                 Get Started Free
                 <ArrowRight size={14} />
               </Link>
@@ -574,6 +574,7 @@ export default function LandingPage() {
               </a>
               <Link
                 to="/dashboard"
+                search={{}}
                 className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
               >
                 Dashboard

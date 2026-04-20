@@ -8,7 +8,6 @@ import { Field, FieldError, FieldLabel, getFieldErrorText, isFieldInvalid } from
 import { Input } from '#/components/ui/input'
 import {
   getConfirmEmailCallbackURL,
-  getConfirmEmailRedirectTarget,
   getSafeRedirectTarget,
   signUp,
 } from '#/lib/auth-client'
@@ -51,7 +50,8 @@ export default function RegisterPage() {
       }
 
       await navigate({
-        href: getConfirmEmailRedirectTarget(redirectTarget),
+        to: '/confirm-email',
+        search: { redirect: redirectTarget },
         replace: true,
       })
     },
@@ -68,7 +68,7 @@ export default function RegisterPage() {
           Already have an account?{' '}
           <Link
             to="/login"
-            search={search.redirect ? { redirect: search.redirect } : undefined}
+            search={search.redirect ? { redirect: search.redirect } : {}}
             className="font-medium text-foreground underline decoration-brand/40 underline-offset-4"
           >
             Sign in instead

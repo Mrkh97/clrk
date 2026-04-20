@@ -1,3 +1,4 @@
+import { useSearch } from '@tanstack/react-router'
 import { Bell } from 'lucide-react'
 import GlassCard from '#/components/GlassCard'
 import PageHeader from '#/components/PageHeader'
@@ -12,6 +13,7 @@ import TimeFilter from './TimeFilter'
 import TransactionList from './TransactionList'
 
 export default function DashboardPage() {
+  const search = useSearch({ from: '/_app/dashboard' })
   const { data, isLoading } = useDashboardData()
   const totalSpent = data
     ? new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.stats.totalSpent)
@@ -40,6 +42,12 @@ export default function DashboardPage() {
       </PageHeader>
 
       <div className="space-y-6 p-4 sm:p-6">
+        {search.verified === '1' && (
+          <div className="rounded-2xl border border-brand/30 bg-brand/10 px-4 py-3 text-sm text-foreground">
+            Your email is verified and your account is ready.
+          </div>
+        )}
+
         <div className="flex items-center justify-between gap-4">
           <div className="w-full sm:w-64">
             <TimeFilter />
