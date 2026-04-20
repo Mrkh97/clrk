@@ -14,13 +14,15 @@ import { env, isAllowedWebOrigin } from './lib/env.js'
 
 const app = new Hono<AppEnv>()
 const api = app.basePath(API_BASE_PATH)
-
-api.use('*', cors({
-  origin: (origin) => (isAllowedWebOrigin(origin) ? origin : env.WEB_ORIGIN),
+const corsOptions = {
+  origin: (origin: string) => (isAllowedWebOrigin(origin) ? origin : env.WEB_ORIGIN),
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
-}))
+}
+
+api.use('*', cors(corsOptions))
+app.use('/verify-email', cors(corsOptions))
 
 app.use('*', authSessionMiddleware)
 

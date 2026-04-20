@@ -114,7 +114,7 @@ export default function ConfirmEmailPage() {
 
       if (refreshedSession?.user.emailVerified) {
         await navigate({
-          href: appendVerifiedSearch(defaultRedirectTarget),
+          href: appendVerifiedSearch(redirectTarget),
           replace: true,
         })
         return

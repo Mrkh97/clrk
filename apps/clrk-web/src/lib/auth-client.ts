@@ -240,29 +240,35 @@ export function appendVerifiedSearch(target: string) {
 }
 
 export async function verifyEmailToken(token: string) {
-  const verificationUrl = new URL('/verify-email', getAuthBaseUrl())
+  try {
+    const verificationUrl = new URL('/verify-email', getAuthBaseUrl())
 
-  verificationUrl.searchParams.set('token', token)
+    verificationUrl.searchParams.set('token', token)
 
-  const response = await fetch(verificationUrl.toString(), {
-    credentials: 'include',
-    headers: {
-      accept: 'application/json',
-    },
-  })
+    const response = await fetch(verificationUrl.toString(), {
+      credentials: 'include',
+      headers: {
+        accept: 'application/json',
+      },
+    })
 
-  const payload = await response.json().catch(() => null) as
-    | { code?: string; message?: string }
-    | null
+    const payload = await response.json().catch(() => null) as
+      | { code?: string; message?: string }
+      | null
 
-  if (!response.ok) {
-    return {
-      error: payload?.code?.toLowerCase() ?? 'verification_failed',
+    if (!response.ok) {
+      return {
+        error: payload?.code?.toLowerCase() ?? 'verification_failed',
+      }
     }
-  }
 
-  return {
-    error: null,
+    return {
+      error: null,
+    }
+  } catch {
+    return {
+      error: 'verification_failed',
+    }
   }
 }
 
