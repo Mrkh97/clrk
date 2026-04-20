@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { LayoutDashboard, Sparkles, Receipt, LogOut, Menu } from 'lucide-react'
 import { Separator } from '#/components/ui/separator'
@@ -21,6 +21,7 @@ const NAV_ITEMS = [
 ] as const
 
 export default function AppSidebar() {
+  const navigate = useNavigate()
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [signOutError, setSignOutError] = useState<string | null>(null)
 
@@ -39,7 +40,10 @@ export default function AppSidebar() {
       return
     }
 
-    window.location.assign('/')
+    await navigate({
+      to: '/',
+      replace: true,
+    })
   }
 
   return (

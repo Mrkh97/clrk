@@ -63,7 +63,10 @@ export default function LoginPage() {
         return
       }
 
-      window.location.replace(redirectTarget)
+      await navigate({
+        href: redirectTarget,
+        replace: true,
+      })
     },
   })
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting)
