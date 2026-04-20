@@ -1,9 +1,9 @@
-import { Link, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { LayoutDashboard, Sparkles, Receipt, LogOut, Menu } from 'lucide-react'
-import { Separator } from '#/components/ui/separator'
-import { Button } from '#/components/ui/button'
-import ThemeToggle from '#/components/ThemeToggle'
+import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { LayoutDashboard, Sparkles, Receipt, Menu } from "lucide-react";
+import { Separator } from "#/components/ui/separator";
+import { Button } from "#/components/ui/button";
+import ThemeToggle from "#/components/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,40 +11,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '#/components/ui/dropdown-menu'
-import { signOut } from '#/lib/auth-client'
+} from "#/components/ui/dropdown-menu";
+import { SignOutButton } from "#/features/authentication/presentations/components/SignOutButton";
+import { SignOutConfirmationDialog } from "#/features/authentication/presentations/components/SignOutConfirmationDialog";
+import { SignOutDropdownMenuItem } from "#/features/authentication/presentations/components/SignOutDropdownMenuItem";
 
 const NAV_ITEMS = [
-  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-  { label: 'Optimizer', to: '/optimizer', icon: Sparkles },
-  { label: 'Receipt', to: '/receipt', icon: Receipt },
-] as const
+  { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+  { label: "Optimizer", to: "/optimizer", icon: Sparkles },
+  { label: "Receipt", to: "/receipt", icon: Receipt },
+] as const;
 
 export default function AppSidebar() {
-  const navigate = useNavigate()
-  const [isSigningOut, setIsSigningOut] = useState(false)
-  const [signOutError, setSignOutError] = useState<string | null>(null)
-
-  const handleSignOut = async () => {
-    if (isSigningOut) {
-      return
-    }
-
-    setIsSigningOut(true)
-    setSignOutError(null)
-    const { error } = await signOut()
-
-    if (error) {
-      setSignOutError(error.message ?? 'Unable to sign out right now.')
-      setIsSigningOut(false)
-      return
-    }
-
-    await navigate({
-      to: '/',
-      replace: true,
-    })
-  }
+  const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
 
   return (
     <>
@@ -82,24 +61,16 @@ export default function AppSidebar() {
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                disabled={isSigningOut}
-                variant="destructive"
-                onSelect={(event) => {
-                  event.preventDefault()
-                  void handleSignOut()
-                }}
-              >
-                <LogOut size={15} />
-                {isSigningOut ? 'Signing Out...' : 'Sign Out'}
-              </DropdownMenuItem>
+              <SignOutDropdownMenuItem
+                onSelect={() => setIsSignOutDialogOpen(true)}
+              />
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </header>
 
       <aside className="glass-sidebar hidden w-56 flex-shrink-0 flex-col md:flex">
-        <div className="flex items-center gap-2.5 px-5 py-5">
+        <div className="flex items-center gap-2.5 px-5 py-7">
           <span className="h-2.5 w-2.5 rounded-full bg-brand" />
           <span className="text-base font-bold tracking-tight text-foreground">
             clrk
@@ -119,14 +90,16 @@ export default function AppSidebar() {
                 {({ isActive }: { isActive: boolean }) => (
                   <>
                     <span
-                      className={`h-1.5 w-1.5 flex-shrink-0 rounded-full transition-colors ${isActive ? 'bg-brand' : 'bg-transparent'}`}
+                      className={`h-1.5 w-1.5 flex-shrink-0 rounded-full transition-colors ${isActive ? "bg-brand" : "bg-transparent"}`}
                     />
                     <item.icon
                       size={15}
-                      className={isActive ? 'text-foreground' : 'text-muted-foreground'}
+                      className={
+                        isActive ? "text-foreground" : "text-muted-foreground"
+                      }
                     />
                     <span
-                      className={`text-sm font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}
+                      className={`text-sm font-medium ${isActive ? "text-foreground" : "text-muted-foreground"}`}
                     >
                       {item.label}
                     </span>
@@ -143,22 +116,7 @@ export default function AppSidebar() {
           <div className="flex justify-center">
             <ThemeToggle />
           </div>
-          <Button
-            variant="ghost"
-            type="button"
-            disabled={isSigningOut}
-            className="flex w-full items-center justify-start gap-3 px-3 py-2.5 text-muted-foreground hover:text-foreground"
-            onClick={() => void handleSignOut()}
-          >
-            <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" />
-            <LogOut size={15} />
-            <span className="text-sm font-medium">
-              {isSigningOut ? 'Signing Out...' : 'Sign Out'}
-            </span>
-          </Button>
-          {signOutError && (
-            <p className="px-3 text-xs text-destructive">{signOutError}</p>
-          )}
+          <SignOutButton onClick={() => setIsSignOutDialogOpen(true)} />
         </div>
       </aside>
 
@@ -173,8 +131,8 @@ export default function AppSidebar() {
               <span
                 className={`flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-medium uppercase tracking-widest transition-colors ${
                   isActive
-                    ? 'bg-brand text-brand-foreground'
-                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                    ? "bg-brand text-brand-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 }`}
               >
                 <item.icon size={16} />
@@ -184,6 +142,11 @@ export default function AppSidebar() {
           </Link>
         ))}
       </nav>
+
+      <SignOutConfirmationDialog
+        open={isSignOutDialogOpen}
+        onOpenChange={setIsSignOutDialogOpen}
+      />
     </>
-  )
+  );
 }

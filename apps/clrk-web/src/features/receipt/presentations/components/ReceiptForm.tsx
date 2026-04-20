@@ -234,7 +234,7 @@ export default function ReceiptForm() {
         )}
       </form.Field>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)]">
         <form.Field
           name="amount"
           validators={{
@@ -243,7 +243,7 @@ export default function ReceiptForm() {
           }}
         >
           {(field) => (
-            <Field field={field} className="space-y-1.5">
+            <Field field={field} className="min-w-0 space-y-1.5">
               <FieldLabel className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 Amount
               </FieldLabel>
@@ -269,6 +269,64 @@ export default function ReceiptForm() {
           )}
         </form.Field>
         <form.Field
+          name="date"
+          validators={{
+            onBlur: receiptFormSchema.shape.date,
+            onSubmit: receiptFormSchema.shape.date,
+          }}
+        >
+          {(field) => (
+            <Field field={field} className="min-w-0 space-y-1.5">
+              <FieldLabel className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Date
+              </FieldLabel>
+              <DatePicker
+                value={field.state.value}
+                onChange={field.handleChange}
+                className={isFieldInvalid(field) ? 'border-destructive text-destructive' : undefined}
+              />
+              <FieldError>{getFieldErrorText(field)}</FieldError>
+            </Field>
+          )}
+        </form.Field>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <form.Field
+          name="category"
+          validators={{
+            onSubmit: receiptFormSchema.shape.category,
+          }}
+        >
+          {(field) => (
+            <Field field={field} className="min-w-0 space-y-1.5">
+              <FieldLabel className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Category
+              </FieldLabel>
+              <Select
+                value={field.state.value}
+                onValueChange={(value) => field.handleChange(value as ReceiptFormValues['category'])}
+              >
+                <SelectTrigger
+                  aria-invalid={isFieldInvalid(field) || undefined}
+                  className="w-full min-w-0 rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 text-sm focus:border-foreground focus:ring-0"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RECEIPT_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {RECEIPT_CATEGORY_LABELS[category]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FieldError>{getFieldErrorText(field)}</FieldError>
+            </Field>
+          )}
+        </form.Field>
+
+        <form.Field
           name="currency"
           validators={{
             onBlur: receiptFormSchema.shape.currency,
@@ -276,14 +334,14 @@ export default function ReceiptForm() {
           }}
         >
           {(field) => (
-            <Field field={field} className="space-y-1.5">
+            <Field field={field} className="min-w-0 space-y-1.5">
               <FieldLabel className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 Currency
               </FieldLabel>
               <Select value={field.state.value} onValueChange={field.handleChange}>
                 <SelectTrigger
                   aria-invalid={isFieldInvalid(field) || undefined}
-                  className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 text-sm focus:border-foreground focus:ring-0"
+                  className="w-full min-w-0 rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 text-sm focus:border-foreground focus:ring-0"
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -299,62 +357,7 @@ export default function ReceiptForm() {
             </Field>
           )}
         </form.Field>
-        <form.Field
-          name="date"
-          validators={{
-            onBlur: receiptFormSchema.shape.date,
-            onSubmit: receiptFormSchema.shape.date,
-          }}
-        >
-          {(field) => (
-            <Field field={field} className="space-y-1.5">
-              <FieldLabel className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                Date
-              </FieldLabel>
-              <DatePicker
-                value={field.state.value}
-                onChange={field.handleChange}
-                className={isFieldInvalid(field) ? 'border-destructive text-destructive' : undefined}
-              />
-              <FieldError>{getFieldErrorText(field)}</FieldError>
-            </Field>
-          )}
-        </form.Field>
       </div>
-
-      <form.Field
-        name="category"
-        validators={{
-          onSubmit: receiptFormSchema.shape.category,
-        }}
-      >
-        {(field) => (
-          <Field field={field} className="space-y-1.5">
-            <FieldLabel className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              Category
-            </FieldLabel>
-            <Select
-              value={field.state.value}
-              onValueChange={(value) => field.handleChange(value as ReceiptFormValues['category'])}
-            >
-              <SelectTrigger
-                aria-invalid={isFieldInvalid(field) || undefined}
-                className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 text-sm focus:border-foreground focus:ring-0"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {RECEIPT_CATEGORIES.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {RECEIPT_CATEGORY_LABELS[category]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FieldError>{getFieldErrorText(field)}</FieldError>
-          </Field>
-        )}
-      </form.Field>
 
       <form.Field
         name="paymentMethod"

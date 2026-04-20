@@ -16,8 +16,8 @@ const HIGHLIGHTS = [
   },
   {
     icon: ShieldCheck,
-    title: 'Session-backed access',
-    copy: 'Protected routes, cookie-based auth, and a cleaner handoff into the app.',
+    title: 'Your expense history, in one place',
+    copy: 'Come back to saved receipts, organized records, and a workspace that remembers where you left off.',
   },
 ] as const
 
@@ -93,7 +93,7 @@ export default function AuthShell({
                 </p>
                 <p className="mt-3 font-display text-3xl font-bold text-foreground">Live</p>
                 <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                  Session-aware routes keep the finance workspace private and direct.
+                  Jump back into your latest receipts and spending activity without losing context.
                 </p>
               </GlassCard>
 
@@ -144,9 +144,9 @@ export default function AuthShell({
           </div>
 
           <div className="mt-6 flex flex-col gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:flex-row sm:items-center">
-            <span>Protected by Better Auth</span>
+            <span>Private and secure</span>
             <ArrowRight size={12} />
-            <span>Receipt extraction stays in your signed-in workspace</span>
+            <span>Your receipts, spending history, and insights stay tied to your account</span>
           </div>
         </GlassCard>
       </div>

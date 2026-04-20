@@ -1,32 +1,14 @@
-import { Link, useNavigate, useSearch } from '@tanstack/react-router'
-import { useForm, useStore } from '@tanstack/react-form'
-import { useMemo, useState } from 'react'
-import { z } from 'zod'
+import { Link, useSearch } from '@tanstack/react-router'
+import { useForm } from '@tanstack/react-form'
 import AuthShell from '#/components/AuthShell'
 import { Button } from '#/components/ui/button'
 import { Field, FieldError, FieldLabel, getFieldErrorText, isFieldInvalid } from '#/components/ui/form'
 import { Input } from '#/components/ui/input'
-import {
-  getConfirmEmailCallbackURL,
-  getSafeRedirectTarget,
-  signUp,
-} from '#/lib/auth-client'
-
-const registerFormSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required.'),
-  email: z.email('Enter a valid email address.'),
-  password: z.string().min(8, 'Use at least 8 characters.'),
-})
+import { registerFormSchema, useRegisterMutation } from '#/features/authentication/hooks/useRegisterMutation'
 
 export default function RegisterPage() {
   const search = useSearch({ from: '/register' })
-  const navigate = useNavigate({ from: '/register' })
-  const redirectTarget = useMemo(
-    () => getSafeRedirectTarget(search.redirect),
-    [search.redirect],
-  )
-
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const registerMutation = useRegisterMutation()
   const form = useForm({
     defaultValues: {
       name: '',
@@ -34,35 +16,18 @@ export default function RegisterPage() {
       password: '',
     },
     onSubmit: async ({ value }) => {
-      setErrorMessage(null)
-
-      const registration = registerFormSchema.parse(value)
-
-      const { error } = await signUp.email({
-        ...registration,
-        callbackURL: getConfirmEmailCallbackURL(redirectTarget),
-        subscriptionEnabled: false,
-      })
-
-      if (error) {
-        setErrorMessage(error.message ?? 'Unable to create your account right now.')
-        return
-      }
-
-      await navigate({
-        to: '/confirm-email',
-        search: { redirect: redirectTarget },
-        replace: true,
-      })
+      await registerMutation.mutateAsync(value).catch(() => null)
     },
   })
-  const isSubmitting = useStore(form.store, (state) => state.isSubmitting)
+  const errorMessage = registerMutation.error instanceof Error
+    ? registerMutation.error.message
+    : null
 
   return (
     <AuthShell
-      eyebrow="Create Account"
-      title="Open your private finance cockpit."
-      description="Register once, then move directly into route-protected budgeting, optimization, and receipt review."
+      eyebrow="Create account"
+      title="Create your clrk account"
+      description="Set up your workspace to store receipts, monitor spending, and keep every expense within reach."
       footer={
         <>
           Already have an account?{' '}
@@ -80,9 +45,9 @@ export default function RegisterPage() {
         <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-muted-foreground">
           Register
         </p>
-        <h2 className="font-display text-3xl font-bold text-foreground">Start with a clean ledger.</h2>
+        <h2 className="font-display text-3xl font-bold text-foreground">Get started in a few seconds.</h2>
         <p className="text-sm leading-6 text-muted-foreground">
-          Create your account to unlock authenticated receipt extraction and the protected app workspace.
+          Create an account to upload receipts, organize purchases, and start building a clearer view of your expenses.
         </p>
       </div>
 
@@ -115,7 +80,7 @@ export default function RegisterPage() {
                 onChange={(event) => field.handleChange(event.target.value)}
                 aria-invalid={isFieldInvalid(field) || undefined}
                 className="h-12 rounded-2xl border-border/80 bg-background/40 px-4"
-                placeholder="Morgan Lee"
+                placeholder="Alex Johnson"
               />
               <FieldError>{getFieldErrorText(field)}</FieldError>
             </Field>
@@ -143,7 +108,7 @@ export default function RegisterPage() {
                 onChange={(event) => field.handleChange(event.target.value)}
                 aria-invalid={isFieldInvalid(field) || undefined}
                 className="h-12 rounded-2xl border-border/80 bg-background/40 px-4"
-                placeholder="you@example.com"
+                placeholder="alex@northstarstudio.com"
               />
               <FieldError>{getFieldErrorText(field)}</FieldError>
             </Field>
@@ -172,7 +137,7 @@ export default function RegisterPage() {
                 onChange={(event) => field.handleChange(event.target.value)}
                 aria-invalid={isFieldInvalid(field) || undefined}
                 className="h-12 rounded-2xl border-border/80 bg-background/40 px-4"
-                placeholder="Use at least 8 characters"
+                placeholder="Create a password with at least 8 characters"
               />
               <FieldError>{getFieldErrorText(field)}</FieldError>
             </Field>
@@ -187,10 +152,10 @@ export default function RegisterPage() {
 
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={registerMutation.isPending}
           className="h-12 w-full rounded-full bg-brand font-mono text-xs font-bold uppercase tracking-[0.28em] text-brand-foreground hover:bg-brand/90"
         >
-          {isSubmitting ? 'Creating Account...' : 'Create Account'}
+          {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
         </Button>
       </form>
     </AuthShell>
