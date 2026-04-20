@@ -112,7 +112,7 @@ export default function LevelSelector() {
           <Button
             disabled={!hasValidRange}
             onClick={() => mutate({ level: selectedLevel, from: fromDate, to: toDate })}
-            className="bg-brand font-mono text-sm font-bold uppercase tracking-wider text-brand-foreground hover:bg-brand/90"
+            className="w-full bg-brand font-mono text-sm font-bold uppercase tracking-wider text-brand-foreground hover:bg-brand/90 sm:w-auto"
           >
             Optimize My Spending
           </Button>

@@ -35,8 +35,8 @@ export default function CategoryBars({ currency, data }: CategoryBarsProps) {
         const color = getCategoryColor(item.category)
         return (
           <div key={item.category}>
-            <div className="mb-1.5 flex items-center justify-between">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            <div className="mb-1.5 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <span className="break-words font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                 {item.category}
               </span>
               <span className="font-mono text-xs font-bold text-foreground">

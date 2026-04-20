@@ -151,7 +151,7 @@ export default function ReceiptForm() {
       className="flex flex-col gap-5"
     >
       {isEditing && (
-        <div className="flex items-center justify-between rounded-lg border border-brand/20 bg-brand-muted px-3 py-2">
+        <div className="flex flex-col gap-2 rounded-lg border border-brand/20 bg-brand-muted px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
           <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-brand">
             Editing receipt
           </span>
@@ -172,7 +172,7 @@ export default function ReceiptForm() {
 
       {isAiExtracted && (
         <div className="space-y-3">
-          <div className="flex items-center gap-2 rounded-lg border border-brand/20 bg-brand-muted px-3 py-2">
+          <div className="flex flex-col gap-1 rounded-lg border border-brand/20 bg-brand-muted px-3 py-2 sm:flex-row sm:items-center sm:gap-2">
             <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-brand">
               AI Extracted
             </span>
@@ -211,7 +211,7 @@ export default function ReceiptForm() {
         )}
       </form.Field>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3">
         <form.Field
           name="amount"
           validators={{

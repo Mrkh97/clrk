@@ -95,9 +95,8 @@ export default function ReceiptUploadZone() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Drop zone */}
       <div
-        className={`relative flex min-h-56 cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed p-8 transition-colors ${
+        className={`relative flex min-h-48 cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed p-6 text-center transition-colors sm:min-h-56 sm:p-8 ${
           uploadState.phase === 'dragging'
             ? 'border-brand bg-brand-muted'
             : 'glass border-border hover:border-muted-foreground'
@@ -182,7 +181,7 @@ export default function ReceiptUploadZone() {
                 {uploadState.errorMessage ?? 'We could not extract this receipt.'}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -210,7 +209,6 @@ export default function ReceiptUploadZone() {
         ) : null}
       </div>
 
-      {/* Tips */}
       {(uploadState.phase === 'idle' || uploadState.phase === 'error') && (
         <div className="glass rounded-lg border-l-2 border-l-brand px-4 py-3">
           <p className="font-mono text-xs uppercase tracking-widest text-brand">Tips</p>

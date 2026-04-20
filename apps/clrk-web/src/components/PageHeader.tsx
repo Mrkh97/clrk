@@ -16,7 +16,7 @@ export default function PageHeader({
   return (
     <header
       className={cn(
-        'glass-heavy flex items-center justify-between px-6 py-4',
+        'glass-heavy flex flex-col items-start gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6',
         className,
       )}
     >
@@ -24,11 +24,15 @@ export default function PageHeader({
         <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           {label}
         </p>
-        <h1 className="font-display text-xl font-bold text-foreground">
+        <h1 className="font-display text-xl font-bold text-foreground sm:text-2xl">
           {title}
         </h1>
       </div>
-      {children && <div className="flex items-center gap-3">{children}</div>}
+      {children && (
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end sm:gap-3">
+          {children}
+        </div>
+      )}
     </header>
   )
 }

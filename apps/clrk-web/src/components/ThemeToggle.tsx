@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Sun, Moon, Monitor } from 'lucide-react'
 import { Button } from '#/components/ui/button'
+import { cn } from '#/lib/utils'
 
 type ThemeMode = 'light' | 'dark' | 'auto'
 
@@ -39,7 +40,15 @@ const ICON = {
   auto: Monitor,
 } as const
 
-export default function ThemeToggle() {
+interface ThemeToggleProps {
+  compact?: boolean
+  className?: string
+}
+
+export default function ThemeToggle({
+  compact = false,
+  className,
+}: ThemeToggleProps) {
   const [mode, setMode] = useState<ThemeMode>('auto')
 
   useEffect(() => {
@@ -80,14 +89,18 @@ export default function ThemeToggle() {
   return (
     <Button
       variant="outline"
-      size="sm"
+      size={compact ? 'icon-sm' : 'sm'}
       onClick={toggleMode}
       aria-label={label}
       title={label}
-      className="gap-1.5 rounded-full text-muted-foreground hover:text-foreground"
+      className={cn(
+        'rounded-full text-muted-foreground hover:text-foreground',
+        !compact && 'gap-1.5',
+        className,
+      )}
     >
       <Icon size={14} />
-      {mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Dark' : 'Light'}
+      {!compact && (mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Dark' : 'Light')}
     </Button>
   )
 }

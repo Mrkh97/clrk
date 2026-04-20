@@ -38,7 +38,7 @@ export default function AuthShell({
 }: AuthShellProps) {
   return (
     <div className="landing-bg min-h-screen px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-6xl items-center justify-between pb-8">
+      <div className="mx-auto flex max-w-6xl flex-col gap-4 pb-8 sm:flex-row sm:items-center sm:justify-between">
         <Link to="/" className="flex items-center gap-2.5 no-underline">
           <span className="h-2.5 w-2.5 rounded-full bg-brand" />
           <span className="font-display text-base font-bold tracking-tight text-foreground">
@@ -46,8 +46,9 @@ export default function AuthShell({
           </span>
         </Link>
 
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          <ThemeToggle compact className="sm:hidden" />
+          <ThemeToggle className="hidden sm:inline-flex" />
           <Link
             to="/"
             className="font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground transition-colors hover:text-foreground"
@@ -142,7 +143,7 @@ export default function AuthShell({
             {footer}
           </div>
 
-          <div className="mt-6 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+          <div className="mt-6 flex flex-col gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:flex-row sm:items-center">
             <span>Protected by Better Auth</span>
             <ArrowRight size={12} />
             <span>Receipt extraction stays in your signed-in workspace</span>

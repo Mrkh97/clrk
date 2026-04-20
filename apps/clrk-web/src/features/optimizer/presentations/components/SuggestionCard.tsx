@@ -18,7 +18,7 @@ export default function SuggestionCard({
   return (
     <GlassCard>
       <CardContent className="p-5">
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-muted">
               <Scissors size={14} className="text-brand" />
@@ -32,21 +32,21 @@ export default function SuggestionCard({
               </p>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-left sm:text-right">
             <p className="font-mono text-lg font-bold text-brand">
               -{formatter.format(suggestion.saving)}
             </p>
           </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-4">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Now</p>
             <p className="font-mono text-sm font-bold text-foreground">
               {formatter.format(suggestion.currentSpend)}
             </p>
           </div>
-          <div className="h-px flex-1 bg-border" />
+          <div className="h-px w-full bg-border sm:flex-1" />
           <div>
             <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Target</p>
             <p className="font-mono text-sm font-bold text-foreground">

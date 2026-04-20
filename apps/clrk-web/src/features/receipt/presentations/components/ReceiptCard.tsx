@@ -48,7 +48,6 @@ export default function ReceiptCard({ receipt, onClick, onDelete, isDeleting, se
       onClick={onClick}
     >
       <CardContent className="p-4">
-        {/* Header row */}
         <div className="mb-3 flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-foreground">{receipt.merchant}</p>
@@ -63,21 +62,18 @@ export default function ReceiptCard({ receipt, onClick, onDelete, isDeleting, se
           )}
         </div>
 
-        {/* Amount */}
         <p className="font-mono text-lg font-bold text-foreground">{formattedAmount}</p>
 
-        {/* Footer row */}
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
           <p className="font-mono text-[10px] text-muted-foreground">{formattedDate}</p>
           <StatusBadge status={statusMap[receipt.status] ?? 'pending'} />
         </div>
 
-        {/* Payment method badge */}
         <div className="mt-2">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <Badge
               variant="outline"
-              className="border-border bg-accent font-mono text-[9px] uppercase tracking-wider text-muted-foreground"
+              className="w-fit border-border bg-accent font-mono text-[9px] uppercase tracking-wider text-muted-foreground"
             >
               {receipt.paymentMethod}
             </Badge>
@@ -87,7 +83,7 @@ export default function ReceiptCard({ receipt, onClick, onDelete, isDeleting, se
                 variant="ghost"
                 size="sm"
                 disabled={isDeleting}
-                className="h-7 px-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:text-destructive"
+                className="h-7 justify-start px-0 font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:text-destructive sm:justify-center sm:px-2"
                 onClick={(event) => {
                   event.stopPropagation()
                   onDelete()

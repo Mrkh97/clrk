@@ -17,8 +17,7 @@ export default function OptimizationResults() {
 
   return (
     <div className="space-y-6">
-      {/* Summary */}
-      <GlassCard variant="elevated" className="p-6 text-center">
+      <GlassCard variant="elevated" className="p-5 text-center sm:p-6">
         <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Potential Monthly Savings
         </p>
@@ -30,7 +29,6 @@ export default function OptimizationResults() {
         </p>
       </GlassCard>
 
-      {/* Suggestions */}
       <div>
         <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Suggestions ({result.suggestions.length})
@@ -42,12 +40,11 @@ export default function OptimizationResults() {
         </div>
       </div>
 
-      {/* Reset */}
       <div className="flex justify-center">
         <Button
           variant="outline"
           onClick={reset}
-          className="gap-2 text-muted-foreground hover:text-foreground"
+          className="w-full gap-2 text-muted-foreground hover:text-foreground sm:w-auto"
         >
           <RotateCcw size={14} />
           Try Different Level

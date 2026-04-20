@@ -11,7 +11,7 @@ export default function OptimizerPage() {
     <div className="min-h-full">
       <PageHeader label="Optimizer" title="Spending Optimizer" />
 
-      <div className="mx-auto max-w-2xl p-6">
+      <div className="mx-auto max-w-3xl p-4 sm:p-6">
         {(store.phase === 'idle' || store.phase === 'loading') && (
           <LevelSelector />
         )}

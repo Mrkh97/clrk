@@ -23,7 +23,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-full">
       <PageHeader label="Dashboard" title="Spending Dashboard">
-        <SearchInput />
+        <SearchInput className="w-full sm:w-auto" />
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -39,21 +39,21 @@ export default function DashboardPage() {
         </div>
       </PageHeader>
 
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 p-4 sm:p-6">
         <div className="flex items-center justify-between gap-4">
-          <div className="w-64">
+          <div className="w-full sm:w-64">
             <TimeFilter />
           </div>
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className="h-28 animate-pulse rounded-xl bg-muted" />
             ))}
           </div>
         ) : data ? (
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               label="Total Spent"
               value={totalSpent}
@@ -78,7 +78,7 @@ export default function DashboardPage() {
         ) : null}
 
         {data && (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 xl:grid-cols-2">
             <GlassCard className="p-5">
               <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 Spending Over Time

@@ -57,7 +57,7 @@ export default function ReceiptList() {
   const form = useForm({ defaultValues: defaultFilterValues })
   const filterValues = useStore(form.store, (state) => state.values)
   const ReceiptFiltersBar = () => (
-    <div className="grid gap-2 rounded-xl border border-border/70 bg-background/30 p-3 sm:grid-cols-3">
+    <div className="grid gap-2 rounded-xl border border-border/70 bg-background/30 p-3 md:grid-cols-3">
       <form.Field
         name="from"
         validators={{
@@ -151,7 +151,7 @@ export default function ReceiptList() {
   if (!receipts || receipts.length === 0) {
     return (
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             0 receipts
           </p>
@@ -180,7 +180,7 @@ export default function ReceiptList() {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           {receipts.length} receipt{receipts.length !== 1 ? 's' : ''}
         </p>

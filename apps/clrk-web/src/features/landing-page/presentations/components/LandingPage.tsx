@@ -127,7 +127,7 @@ export default function LandingPage() {
   return (
     <div className="landing-bg min-h-screen">
       <nav className="glass-heavy fixed left-0 right-0 top-0 z-50 animate-in fade-in slide-in-from-top duration-500">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex items-center gap-2.5">
             <span className="h-2.5 w-2.5 rounded-full bg-brand" />
             <span className="font-display text-base font-bold tracking-tight text-foreground">
@@ -150,24 +150,31 @@ export default function LandingPage() {
             </a>
           </div>
 
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle compact className="sm:hidden" />
+            <ThemeToggle className="hidden sm:inline-flex" />
             <Button
               asChild
               size="sm"
               className="bg-brand font-mono text-xs uppercase tracking-wider text-brand-foreground hover:bg-brand/90"
             >
               {isAuthenticated ? (
-                <Link to="/dashboard">Open Dashboard</Link>
+                <Link to="/dashboard">
+                  <span className="sm:hidden">Open</span>
+                  <span className="hidden sm:inline">Open Dashboard</span>
+                </Link>
               ) : (
-                <Link to="/register">Get Started</Link>
+                <Link to="/register">
+                  <span className="sm:hidden">Join</span>
+                  <span className="hidden sm:inline">Get Started</span>
+                </Link>
               )}
             </Button>
           </div>
         </div>
       </nav>
 
-      <section className="flex min-h-screen flex-col items-center justify-center px-6 pb-16 pt-24">
+      <section className="flex min-h-screen flex-col items-center justify-center px-4 pb-16 pt-24 sm:px-6">
         <div className="mx-auto max-w-4xl text-center">
           <div
             className="animate-in fade-in duration-500 fill-mode-both"
@@ -206,7 +213,7 @@ export default function LandingPage() {
             <Button
               asChild
               size="lg"
-              className="bg-brand font-mono text-xs font-bold uppercase tracking-widest text-brand-foreground hover:bg-brand/90"
+              className="w-full bg-brand font-mono text-xs font-bold uppercase tracking-widest text-brand-foreground hover:bg-brand/90 sm:w-auto"
             >
               {isAuthenticated ? (
                 <Link to="/dashboard">
@@ -224,7 +231,7 @@ export default function LandingPage() {
               asChild
               variant="outline"
               size="lg"
-              className="font-mono text-xs uppercase tracking-wider"
+              className="w-full font-mono text-xs uppercase tracking-wider sm:w-auto"
             >
               <a href="#features">See How It Works</a>
             </Button>
@@ -235,8 +242,8 @@ export default function LandingPage() {
           className="mt-12 w-full max-w-3xl animate-float animate-in fade-in zoom-in-95 duration-700 fill-mode-both md:mt-16"
           style={{ animationDelay: '600ms' }}
         >
-          <GlassCard variant="elevated" className="overflow-hidden p-5">
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <GlassCard variant="elevated" className="overflow-hidden p-4 sm:p-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {HERO_STATS.map((stat) => (
                 <div key={stat.label}>
                   <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
@@ -542,7 +549,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="border-t border-border px-6 py-12">
+      <footer className="border-t border-border px-4 py-12 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
             <div className="flex items-center gap-2.5">
@@ -552,7 +559,7 @@ export default function LandingPage() {
               </span>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
               <a
                 href="#features"
                 className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
