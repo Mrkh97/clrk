@@ -20,7 +20,15 @@ interface MyRouterContext {
 const GOOGLE_FONTS_HREF =
   "https://fonts.googleapis.com/css2?family=Doto:wght@400;700&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap";
 
-const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`;
+const themeScript = `(function() {
+  try {
+    const theme = localStorage.getItem('theme') || 'auto';
+    const resolved = theme === 'auto'
+      ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : theme;
+    document.documentElement.classList.add(resolved);
+  } catch (e) {}
+})();`;
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
@@ -64,7 +72,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <ScriptOnce>{THEME_INIT_SCRIPT}</ScriptOnce>
+        <ScriptOnce>{themeScript}</ScriptOnce>
         <HeadContent />
       </head>
       <body
