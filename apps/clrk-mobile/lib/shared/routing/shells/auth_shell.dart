@@ -21,7 +21,9 @@ class AuthShell extends StatelessWidget {
 
               final hero = Container(
                 padding: const EdgeInsets.all(28),
-                decoration: AppTheme.glassPanel(radius: BorderRadius.circular(32)),
+                decoration: AppTheme.glassPanel(
+                  radius: BorderRadius.circular(32),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -42,15 +44,18 @@ class AuthShell extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 28),
-                    Text('AUTHENTICATED SPACE', style: AppTheme.monoLabel(context)),
+                    Text(
+                      'MOBILE FINANCE COCKPIT',
+                      style: AppTheme.monoLabel(context),
+                    ),
                     const SizedBox(height: 14),
                     Text(
-                      'Mobile finance, with the same calm industrial pulse.',
+                      'Set up your account and step into a calmer money workflow.',
                       style: theme.textTheme.displayMedium,
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Sign in to reach your dashboard, optimizer, and receipt workspace with the same dark glass rhythm as the web app.',
+                      'The mobile app brings receipt capture, dashboard monitoring, and optimizer guidance into one protected space designed for quick daily use.',
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: AppColors.mutedForeground,
                       ),
@@ -60,9 +65,21 @@ class AuthShell extends StatelessWidget {
                       spacing: 12,
                       runSpacing: 12,
                       children: const [
-                        _AuthHighlight(label: '1 TAP', text: 'Receipt intake stays close to the camera.'),
-                        _AuthHighlight(label: 'LIVE', text: 'Dashboard and optimizer stay behind session-aware routes.'),
-                        _AuthHighlight(label: 'AI', text: 'Extract, review, and act without leaving the workspace.'),
+                        _AuthHighlight(
+                          label: 'CAPTURE',
+                          text:
+                              'Receipt intake stays close to the camera and review flow.',
+                        ),
+                        _AuthHighlight(
+                          label: 'TRACK',
+                          text:
+                              'Dashboard and optimizer stay behind session-aware routes.',
+                        ),
+                        _AuthHighlight(
+                          label: 'ACT',
+                          text:
+                              'Move from raw numbers to guided decisions without context switching.',
+                        ),
                       ],
                     ),
                   ],
@@ -71,7 +88,10 @@ class AuthShell extends StatelessWidget {
 
               final formPane = Container(
                 constraints: const BoxConstraints(maxWidth: 460),
-                decoration: AppTheme.glassPanel(heavy: true, radius: BorderRadius.circular(32)),
+                decoration: AppTheme.glassPanel(
+                  heavy: true,
+                  radius: BorderRadius.circular(32),
+                ),
                 padding: const EdgeInsets.all(28),
                 child: child,
               );
@@ -127,7 +147,10 @@ class _AuthHighlight extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: AppTheme.monoLabel(context, color: AppColors.brand)),
+            Text(
+              label,
+              style: AppTheme.monoLabel(context, color: AppColors.brand),
+            ),
             const SizedBox(height: 10),
             Text(text, style: theme.textTheme.bodySmall),
           ],

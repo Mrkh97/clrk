@@ -3,9 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../features/auth/domains/auth_redirect.dart';
+import '../../features/auth/presentation/auth_entry_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/onboarding_intro_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/usecases/auth_controller.dart';
+import '../../features/auth/usecases/onboarding_controller.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/optimizer/presentation/optimizer_screen.dart';
 import '../../features/receipt/presentation/receipt_screen.dart';
@@ -16,6 +19,7 @@ import 'shells/auth_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authControllerProvider);
+  final hasSeenOnboarding = ref.watch(onboardingControllerProvider);
   final authKey = ref.watch(authKeyProvider);
   final mainKey = ref.watch(mainKeyProvider);
 
@@ -24,7 +28,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     navigatorKey: mainKey,
     redirect: (context, state) {
       final location = state.uri.path;
-      final isAuthRoute = location == '/login' || location == '/register';
+      final isOnboardingRoute = location == '/onboarding';
+      final isAuthRoute =
+          location == '/auth' ||
+          location == '/login' ||
+          location == '/register';
       final session = switch (authState) {
         AsyncData(:final value) => value,
         _ => null,
@@ -34,21 +42,45 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       );
 
       if (session == null) {
+        if (!hasSeenOnboarding) {
+          if (isOnboardingRoute) {
+            return null;
+          }
+
+          if (location == '/') {
+            return '/onboarding';
+          }
+
+          return Uri(
+            path: '/onboarding',
+            queryParameters: {'redirect': requestedRedirect},
+          ).toString();
+        }
+
+        if (isOnboardingRoute) {
+          return requestedRedirect == defaultAuthenticatedRoute
+              ? '/auth'
+              : Uri(
+                  path: '/auth',
+                  queryParameters: {'redirect': requestedRedirect},
+                ).toString();
+        }
+
         if (isAuthRoute) {
           return null;
         }
 
         if (location == '/') {
-          return '/login';
+          return '/auth';
         }
 
         return Uri(
-          path: '/login',
+          path: '/auth',
           queryParameters: {'redirect': requestedRedirect},
         ).toString();
       }
 
-      if (isAuthRoute) {
+      if (isOnboardingRoute || isAuthRoute) {
         final explicitRedirect = getSafeRedirectTarget(
           state.uri.queryParameters['redirect'],
         );
@@ -63,6 +95,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/onboarding',
+        pageBuilder: (context, state) => MaterialPage<void>(
+          key: state.pageKey,
+          child: OnboardingIntroScreen(
+            redirectTo: state.uri.queryParameters['redirect'],
+          ),
+        ),
+      ),
       ShellRoute(
         navigatorKey: authKey,
         pageBuilder: (context, state, child) => MaterialPage<void>(
@@ -70,6 +111,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           child: AuthShell(child: child),
         ),
         routes: [
+          GoRoute(
+            path: '/auth',
+            pageBuilder: (context, state) => MaterialPage<void>(
+              key: state.pageKey,
+              child: AuthEntryScreen(
+                redirectTo: state.uri.queryParameters['redirect'],
+              ),
+            ),
+          ),
           GoRoute(
             path: '/login',
             pageBuilder: (context, state) => MaterialPage<void>(
@@ -100,9 +150,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/dashboard',
-                pageBuilder: (context, state) => const MaterialPage<void>(
-                  child: DashboardScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const MaterialPage<void>(child: DashboardScreen()),
               ),
             ],
           ),
@@ -110,9 +159,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/optimizer',
-                pageBuilder: (context, state) => const MaterialPage<void>(
-                  child: OptimizerScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const MaterialPage<void>(child: OptimizerScreen()),
               ),
             ],
           ),
@@ -120,9 +168,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/receipt',
-                pageBuilder: (context, state) => const MaterialPage<void>(
-                  child: ReceiptScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const MaterialPage<void>(child: ReceiptScreen()),
               ),
             ],
           ),

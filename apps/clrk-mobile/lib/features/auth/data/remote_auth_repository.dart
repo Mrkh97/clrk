@@ -9,7 +9,9 @@ class RemoteAuthRepository {
 
   Future<AuthSession?> getSession() async {
     try {
-      final response = await _dio.get<Map<String, dynamic>>('/api/auth/get-session');
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/api/auth/get-session',
+      );
       final payload = response.data ?? const <String, dynamic>{};
 
       if (payload['user'] is! Map<String, dynamic>) {
@@ -32,11 +34,7 @@ class RemoteAuthRepository {
   }) async {
     await _dio.post<void>(
       '/api/auth/sign-in/email',
-      data: {
-        'email': email,
-        'password': password,
-        'rememberMe': true,
-      },
+      data: {'email': email, 'password': password, 'rememberMe': true},
     );
 
     final session = await getSession();
@@ -55,11 +53,7 @@ class RemoteAuthRepository {
   }) async {
     await _dio.post<void>(
       '/api/auth/sign-up/email',
-      data: {
-        'name': name,
-        'email': email,
-        'password': password,
-      },
+      data: {'name': name, 'email': email, 'password': password},
     );
 
     final session = await getSession();

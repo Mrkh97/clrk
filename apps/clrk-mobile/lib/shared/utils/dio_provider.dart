@@ -18,8 +18,9 @@ final cookieJarProvider = Provider<CookieJar>((ref) {
     return CookieJar();
   }
 
-  final directory = Directory('${Directory.systemTemp.path}/clrk-mobile-cookies')
-    ..createSync(recursive: true);
+  final directory = Directory(
+    '${Directory.systemTemp.path}/clrk-mobile-cookies',
+  )..createSync(recursive: true);
 
   return PersistCookieJar(storage: FileStorage(directory.path));
 });
@@ -75,15 +76,7 @@ String _resolveApiBaseUrl() {
     return configured;
   }
 
-  if (kIsWeb) {
-    return 'http://localhost:3001';
-  }
-
-  if (Platform.isAndroid) {
-    return 'http://10.0.2.2:3001';
-  }
-
-  return 'http://localhost:3001';
+  return 'https://api.clrk.app';
 }
 
 bool _shouldInvalidateSession(DioException error) {

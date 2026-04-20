@@ -36,13 +36,15 @@ class _OptimizerScreenState extends ConsumerState<OptimizerScreen> {
   Widget build(BuildContext context) {
     return AppPageScaffold(
       title: 'Spending Optimizer',
-      subtitle: 'Pressure-test your recent spend and surface cuts that still feel realistic.',
+      subtitle:
+          'Pressure-test your recent spend and surface cuts that still feel realistic.',
       child: ListView(
         padding: const EdgeInsets.only(bottom: 140),
         children: [
           AppSectionCard(
             title: 'Optimization Brief',
-            subtitle: 'Choose a level and time window before the backend builds its suggestion set.',
+            subtitle:
+                'Choose a level and time window before the backend builds its suggestion set.',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -91,7 +93,9 @@ class _OptimizerScreenState extends ConsumerState<OptimizerScreen> {
                   const SizedBox(height: 16),
                   Text(
                     _error!,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.error),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: AppColors.error),
                   ),
                 ],
                 const SizedBox(height: 18),
@@ -106,7 +110,8 @@ class _OptimizerScreenState extends ConsumerState<OptimizerScreen> {
           if (_isLoading)
             const AppSectionCard(
               title: 'Analyzing',
-              subtitle: 'The optimizer is evaluating your recent spend patterns.',
+              subtitle:
+                  'The optimizer is evaluating your recent spend patterns.',
               child: Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
@@ -166,7 +171,9 @@ class _OptimizerScreenState extends ConsumerState<OptimizerScreen> {
     });
 
     try {
-      final result = await ref.read(remoteOptimizerRepositoryProvider).optimize(
+      final result = await ref
+          .read(remoteOptimizerRepositoryProvider)
+          .optimize(
             level: _level,
             from: formatDateInput(_from),
             to: formatDateInput(_to),
@@ -177,7 +184,8 @@ class _OptimizerScreenState extends ConsumerState<OptimizerScreen> {
       setState(() => _result = result);
       context.showInfoToast(
         'Optimizer complete',
-        description: 'Found ${result.suggestions.length} suggestions for your selected window.',
+        description:
+            'Found ${result.suggestions.length} suggestions for your selected window.',
       );
     } catch (error) {
       if (!mounted) return;
@@ -212,7 +220,9 @@ class _LevelOption extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? AppColors.brand : AppColors.surfaceSoft,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: selected ? AppColors.brand : AppColors.border),
+          border: Border.all(
+            color: selected ? AppColors.brand : AppColors.border,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,15 +231,21 @@ class _LevelOption extends StatelessWidget {
               label.toUpperCase(),
               style: AppTheme.monoLabel(
                 context,
-                color: selected ? const Color(0xFF16110D) : AppColors.foreground,
+                color: selected
+                    ? const Color(0xFF16110D)
+                    : AppColors.foreground,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              label == 'Easy' ? 'Smaller, easier lifestyle cuts.' : 'Bigger moves and stricter savings pressure.',
+              label == 'Easy'
+                  ? 'Smaller, easier lifestyle cuts.'
+                  : 'Bigger moves and stricter savings pressure.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: selected ? const Color(0xFF241A14) : AppColors.mutedForeground,
-                  ),
+                color: selected
+                    ? const Color(0xFF241A14)
+                    : AppColors.mutedForeground,
+              ),
             ),
           ],
         ),
@@ -279,7 +295,8 @@ class _OptimizerResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppSectionCard(
       title: 'Optimizer Result',
-      subtitle: 'A compressed summary of current spend versus possible savings.',
+      subtitle:
+          'A compressed summary of current spend versus possible savings.',
       child: Row(
         children: [
           Expanded(
@@ -326,7 +343,9 @@ class _ResultMetric extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             value,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: tone),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: tone),
           ),
         ],
       ),

@@ -17,36 +17,25 @@ class AppShell extends ConsumerWidget {
     return Scaffold(
       body: DecoratedBox(
         decoration: BoxDecoration(gradient: AppTheme.backgroundGradient()),
-        child: navigationShell,
-      ),
-      floatingActionButton: FloatingActionButton.small(
-        onPressed: () async {
-          try {
-            await ref.read(authControllerProvider.notifier).signOut();
-          } catch (error) {
-            if (!context.mounted) {
-              return;
-            }
-
-            context.showErrorToast(
-              'Sign out failed',
-              description: authErrorMessage(error),
-            );
-          }
-        },
-        backgroundColor: AppColors.surfaceHeavy,
-        foregroundColor: AppColors.foreground,
-        child: const Icon(Icons.logout_rounded, size: 18),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
-      bottomNavigationBar: AppBottomNav(
-        currentIndex: navigationShell.currentIndex,
-        onTap: (index) {
-          navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
-          );
-        },
+        child: Stack(
+          children: [
+            navigationShell,
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: AppBottomNav(
+                currentIndex: navigationShell.currentIndex,
+                onTap: (index) {
+                  navigationShell.goBranch(
+                    index,
+                    initialLocation: index == navigationShell.currentIndex,
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -18,7 +18,9 @@ class DashboardTimeFilterNotifier extends Notifier<DashboardTimeFilter> {
   }
 }
 
-final remoteDashboardRepositoryProvider = Provider<RemoteDashboardRepository>((ref) {
+final remoteDashboardRepositoryProvider = Provider<RemoteDashboardRepository>((
+  ref,
+) {
   return RemoteDashboardRepository(ref.watch(dioProvider));
 });
 

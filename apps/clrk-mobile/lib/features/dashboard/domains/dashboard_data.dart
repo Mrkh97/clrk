@@ -20,7 +20,10 @@ class DashboardData {
           .map((item) => CategorySpend.fromJson(item as Map<String, dynamic>))
           .toList(),
       transactions: (json['transactions'] as List<dynamic>? ?? const [])
-          .map((item) => DashboardTransaction.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                DashboardTransaction.fromJson(item as Map<String, dynamic>),
+          )
           .toList(),
     );
   }

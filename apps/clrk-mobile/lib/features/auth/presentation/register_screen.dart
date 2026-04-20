@@ -44,11 +44,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       children: [
         Text('CREATE ACCOUNT', style: AppTheme.monoLabel(context)),
         const SizedBox(height: 12),
-        Text('Open your private finance cockpit.', style: theme.textTheme.headlineMedium),
+        Text(
+          'Open your private finance cockpit.',
+          style: theme.textTheme.headlineMedium,
+        ),
         const SizedBox(height: 10),
         Text(
           'Register once, then move directly into route-protected budgeting, optimization, and receipt review.',
-          style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.mutedForeground),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: AppColors.mutedForeground,
+          ),
         ),
         const SizedBox(height: 28),
         AppTextField(
@@ -83,11 +88,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             decoration: BoxDecoration(
               color: AppColors.error.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.error.withValues(alpha: 0.35)),
+              border: Border.all(
+                color: AppColors.error.withValues(alpha: 0.35),
+              ),
             ),
             child: Text(
               _errorMessage!,
-              style: theme.textTheme.bodySmall?.copyWith(color: AppColors.error),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppColors.error,
+              ),
             ),
           ),
         ],
@@ -101,7 +110,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           children: [
             Text(
               'Already have an account?',
-              style: theme.textTheme.bodySmall?.copyWith(color: AppColors.mutedForeground),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppColors.mutedForeground,
+              ),
             ),
             TextButton(
               onPressed: () {
@@ -127,7 +138,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
 
     if (password.length < 8) {
-      setState(() => _errorMessage = 'Password must be at least 8 characters long.');
+      setState(
+        () => _errorMessage = 'Password must be at least 8 characters long.',
+      );
       return;
     }
 
@@ -137,11 +150,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     try {
-      await ref.read(authControllerProvider.notifier).signUp(
-            name: name,
-            email: email,
-            password: password,
-          );
+      await ref
+          .read(authControllerProvider.notifier)
+          .signUp(name: name, email: email, password: password);
       if (!mounted) return;
       context.go(safeRedirect);
     } catch (error) {
@@ -164,5 +175,8 @@ String _authPath(String path, String? redirectTo) {
     return path;
   }
 
-  return Uri(path: path, queryParameters: {'redirect': safeRedirect}).toString();
+  return Uri(
+    path: path,
+    queryParameters: {'redirect': safeRedirect},
+  ).toString();
 }

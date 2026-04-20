@@ -7,7 +7,8 @@ class AuthSession {
   });
 
   factory AuthSession.fromJson(Map<String, dynamic> json) {
-    final user = json['user'] as Map<String, dynamic>? ?? const <String, dynamic>{};
+    final user =
+        json['user'] as Map<String, dynamic>? ?? const <String, dynamic>{};
 
     return AuthSession(
       userId: user['id'] as String? ?? '',

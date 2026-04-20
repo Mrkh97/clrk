@@ -8,6 +8,7 @@ class ReceiptFormState {
   const ReceiptFormState({
     required this.merchant,
     required this.amount,
+    required this.currency,
     required this.date,
     required this.category,
     required this.paymentMethod,
@@ -18,6 +19,7 @@ class ReceiptFormState {
     return ReceiptFormState(
       merchant: '',
       amount: '',
+      currency: 'TRY',
       date: DateTime.now().toIso8601String().split('T').first,
       category: ReceiptCategory.food,
       paymentMethod: PaymentMethod.card,
@@ -29,6 +31,7 @@ class ReceiptFormState {
     return ReceiptFormState(
       merchant: receipt.merchant,
       amount: receipt.amount.toStringAsFixed(2),
+      currency: receipt.currency,
       date: receipt.date,
       category: receipt.category,
       paymentMethod: receipt.paymentMethod,
@@ -36,8 +39,13 @@ class ReceiptFormState {
     );
   }
 
+  factory ReceiptFormState.fromExtractedReceipt(ExtractedReceipt receipt) {
+    return ReceiptFormState.initial().applyExtractedReceipt(receipt);
+  }
+
   final String merchant;
   final String amount;
+  final String currency;
   final String date;
   final ReceiptCategory category;
   final PaymentMethod paymentMethod;
@@ -46,6 +54,7 @@ class ReceiptFormState {
   ReceiptFormState copyWith({
     String? merchant,
     String? amount,
+    String? currency,
     String? date,
     ReceiptCategory? category,
     PaymentMethod? paymentMethod,
@@ -54,6 +63,7 @@ class ReceiptFormState {
     return ReceiptFormState(
       merchant: merchant ?? this.merchant,
       amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
       date: date ?? this.date,
       category: category ?? this.category,
       paymentMethod: paymentMethod ?? this.paymentMethod,
@@ -65,6 +75,7 @@ class ReceiptFormState {
     return copyWith(
       merchant: receipt.merchant ?? merchant,
       amount: receipt.total?.toStringAsFixed(2) ?? amount,
+      currency: receipt.currency ?? currency,
       date: _normalizeReceiptDate(receipt.date) ?? date,
       paymentMethod: receipt.paymentMethod ?? paymentMethod,
       notes: receipt.notes ?? notes,
@@ -75,6 +86,7 @@ class ReceiptFormState {
     return ReceiptFormInput(
       merchant: merchant.trim(),
       amount: amount.trim(),
+      currency: currency.trim(),
       date: date,
       category: category,
       paymentMethod: paymentMethod,

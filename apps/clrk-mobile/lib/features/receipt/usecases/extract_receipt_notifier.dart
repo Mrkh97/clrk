@@ -16,7 +16,7 @@ class ExtractReceiptNotifier extends _$ExtractReceiptNotifier {
   @override
   FutureOr<ExtractedReceipt?> build() => null;
 
-  Future<void> extract({
+  Future<ExtractedReceipt?> extract({
     required String filePath,
     required String sourceLabel,
   }) async {
@@ -27,13 +27,16 @@ class ExtractReceiptNotifier extends _$ExtractReceiptNotifier {
     ref.read(selectedCaptureSourceProvider.notifier).set(sourceLabel);
     ref.read(selectedReceiptIdProvider.notifier).clear();
 
-    state = await AsyncValue.guard(() async {
+    final nextState = await AsyncValue.guard(() async {
       final response = await repository.extractReceipt(filePath);
       ref
           .read(receiptFormStateProvider.notifier)
-          .applyExtractedReceipt(response.receipt);
+          .populateFromExtractedReceipt(response.receipt);
       return response.receipt;
     });
+
+    state = nextState;
+    return nextState.asData?.value;
   }
 
   void clear() {

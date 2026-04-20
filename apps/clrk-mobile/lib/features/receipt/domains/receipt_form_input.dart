@@ -5,6 +5,7 @@ class ReceiptFormInput {
   const ReceiptFormInput({
     required this.merchant,
     required this.amount,
+    required this.currency,
     required this.date,
     required this.category,
     required this.paymentMethod,
@@ -14,6 +15,7 @@ class ReceiptFormInput {
 
   final String merchant;
   final String amount;
+  final String currency;
   final String date;
   final ReceiptCategory category;
   final PaymentMethod paymentMethod;
@@ -24,7 +26,7 @@ class ReceiptFormInput {
     return {
       'merchant': merchant,
       'amount': double.parse(amount),
-      'currency': 'USD',
+      'currency': currency,
       'date': date,
       'category': category.name,
       'paymentMethod': paymentMethod.name,

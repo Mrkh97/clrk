@@ -1,3 +1,5 @@
+import 'package:clrk_mobile/features/auth/usecases/auth_controller.dart';
+import 'package:clrk_mobile/shared/extensions/build_context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -18,10 +20,26 @@ class DashboardScreen extends ConsumerWidget {
 
     return AppPageScaffold(
       title: 'Spending Dashboard',
-      subtitle: 'A dark, live read on your spend, category pressure, and most recent transactions.',
-      actions: IconButton(
-        onPressed: () => ref.invalidate(dashboardDataProvider),
-        icon: const Icon(Icons.refresh_rounded),
+      subtitle:
+          'A dark, live read on your spend, category pressure, and most recent transactions.',
+      actions: FloatingActionButton.small(
+        onPressed: () async {
+          try {
+            await ref.read(authControllerProvider.notifier).signOut();
+          } catch (error) {
+            if (!context.mounted) {
+              return;
+            }
+
+            context.showErrorToast(
+              'Sign out failed',
+              description: authErrorMessage(error),
+            );
+          }
+        },
+        backgroundColor: AppColors.surfaceHeavy,
+        foregroundColor: AppColors.foreground,
+        child: const Icon(Icons.logout_rounded, size: 18),
       ),
       child: ListView(
         padding: const EdgeInsets.only(bottom: 140),
@@ -31,11 +49,13 @@ class DashboardScreen extends ConsumerWidget {
             child: Row(
               children: [
                 for (final filter in DashboardTimeFilter.values) ...[
-                    _FilterChip(
+                  _FilterChip(
                     label: filter.label,
                     selected: filter == selectedFilter,
                     onTap: () {
-                      ref.read(dashboardTimeFilterProvider.notifier).setFilter(filter);
+                      ref
+                          .read(dashboardTimeFilterProvider.notifier)
+                          .setFilter(filter);
                     },
                   ),
                   const SizedBox(width: 10),
@@ -87,7 +107,10 @@ class _DashboardContent extends StatelessWidget {
               label: 'Avg Daily',
               value: formatCurrency(stats.avgDaily, data.currency),
             ),
-            _MetricCard(label: 'Top Category', value: stats.topCategory.toUpperCase()),
+            _MetricCard(
+              label: 'Top Category',
+              value: stats.topCategory.toUpperCase(),
+            ),
             _MetricCard(
               label: 'Transactions',
               value: stats.transactionCount.toString(),
@@ -132,7 +155,8 @@ class _DashboardContent extends StatelessWidget {
         const SizedBox(height: 18),
         AppSectionCard(
           title: 'Recent Transactions',
-          subtitle: 'Your last recorded movements in the authenticated workspace.',
+          subtitle:
+              'Your last recorded movements in the authenticated workspace.',
           child: Column(
             children: [
               for (final transaction in data.transactions.take(6)) ...[
@@ -147,7 +171,10 @@ class _DashboardContent extends StatelessWidget {
   }
 
   double _monthlyRatio(double amount, List<MonthlySpend> values) {
-    final max = values.fold<double>(0, (current, item) => item.amount > current ? item.amount : current);
+    final max = values.fold<double>(
+      0,
+      (current, item) => item.amount > current ? item.amount : current,
+    );
 
     if (max <= 0) {
       return 0;
@@ -212,10 +239,11 @@ class _BarRow extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(
-              child: Text(label, style: theme.textTheme.bodyMedium),
+            Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
+            Text(
+              value,
+              style: AppTheme.monoLabel(context, color: AppColors.foreground),
             ),
-            Text(value, style: AppTheme.monoLabel(context, color: AppColors.foreground)),
           ],
         ),
         const SizedBox(height: 8),
@@ -254,7 +282,10 @@ class _TransactionTile extends StatelessWidget {
               color: AppColors.brand.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.receipt_long_rounded, color: AppColors.brand),
+            child: const Icon(
+              Icons.receipt_long_rounded,
+              color: AppColors.brand,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -291,10 +322,7 @@ class _DashboardLoading extends StatelessWidget {
         4,
         (_) => Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: Container(
-            height: 110,
-            decoration: AppTheme.glassPanel(),
-          ),
+          child: Container(height: 110, decoration: AppTheme.glassPanel()),
         ),
       ),
     );

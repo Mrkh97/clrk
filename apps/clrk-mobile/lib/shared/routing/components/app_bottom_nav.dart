@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 import '../../theme/app_theme.dart';
 
@@ -21,22 +22,27 @@ class AppBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: Container(
-          decoration: AppTheme.glassPanel(heavy: true, radius: BorderRadius.circular(28)),
-          child: Row(
-            children: [
-              for (var index = 0; index < _items.length; index++)
-                Expanded(
-                  child: _BottomNavButton(
-                    item: _items[index],
-                    isActive: index == currentIndex,
-                    onTap: () => onTap(index),
-                  ),
-                ),
-            ],
+        padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+        child: LiquidGlassLayer(
+          child: LiquidGlass(
+            shape: LiquidRoundedSuperellipse(borderRadius: 28),
+            child: Container(
+              height: 100,
+              decoration: BoxDecoration(color: Colors.black38),
+              child: Row(
+                children: [
+                  for (var index = 0; index < _items.length; index++)
+                    Expanded(
+                      child: _BottomNavButton(
+                        item: _items[index],
+                        isActive: index == currentIndex,
+                        onTap: () => onTap(index),
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -79,7 +85,9 @@ class _BottomNavButton extends StatelessWidget {
             Icon(
               item.icon,
               size: 18,
-              color: isActive ? AppColors.foreground : AppColors.mutedForeground,
+              color: isActive
+                  ? AppColors.foreground
+                  : AppColors.mutedForeground,
             ),
             const SizedBox(height: 6),
             Text(
@@ -87,7 +95,9 @@ class _BottomNavButton extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.labelSmall?.copyWith(
-                color: isActive ? AppColors.foreground : AppColors.mutedForeground,
+                color: isActive
+                    ? AppColors.foreground
+                    : AppColors.mutedForeground,
               ),
             ),
           ],

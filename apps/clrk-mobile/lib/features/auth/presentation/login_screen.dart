@@ -47,7 +47,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         const SizedBox(height: 10),
         Text(
           'Pick up where you left off and move straight into your protected dashboard, optimizer, and receipt review workspace.',
-          style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.mutedForeground),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: AppColors.mutedForeground,
+          ),
         ),
         const SizedBox(height: 28),
         Form(
@@ -79,11 +81,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   decoration: BoxDecoration(
                     color: AppColors.error.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.error.withValues(alpha: 0.35)),
+                    border: Border.all(
+                      color: AppColors.error.withValues(alpha: 0.35),
+                    ),
                   ),
                   child: Text(
                     _errorMessage!,
-                    style: theme.textTheme.bodySmall?.copyWith(color: AppColors.error),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.error,
+                    ),
                   ),
                 ),
               ],
@@ -100,7 +106,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           children: [
             Text(
               'New to clrk?',
-              style: theme.textTheme.bodySmall?.copyWith(color: AppColors.mutedForeground),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppColors.mutedForeground,
+              ),
             ),
             TextButton(
               onPressed: () {
@@ -130,10 +138,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      await ref.read(authControllerProvider.notifier).signIn(
-            email: email,
-            password: password,
-          );
+      await ref
+          .read(authControllerProvider.notifier)
+          .signIn(email: email, password: password);
       if (!mounted) return;
       context.go(safeRedirect);
     } catch (error) {
@@ -156,5 +163,8 @@ String _authPath(String path, String? redirectTo) {
     return path;
   }
 
-  return Uri(path: path, queryParameters: {'redirect': safeRedirect}).toString();
+  return Uri(
+    path: path,
+    queryParameters: {'redirect': safeRedirect},
+  ).toString();
 }

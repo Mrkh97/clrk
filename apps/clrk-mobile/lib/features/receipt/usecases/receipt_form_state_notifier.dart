@@ -14,6 +14,9 @@ class ReceiptFormStateNotifier extends _$ReceiptFormStateNotifier {
 
   void setAmount(String amount) => state = state.copyWith(amount: amount);
 
+  void setCurrency(String currency) =>
+      state = state.copyWith(currency: currency);
+
   void setDate(String date) => state = state.copyWith(date: date);
 
   void setCategory(ReceiptCategory category) =>
@@ -26,6 +29,10 @@ class ReceiptFormStateNotifier extends _$ReceiptFormStateNotifier {
 
   void populateFromReceipt(Receipt receipt) {
     state = ReceiptFormState.fromReceipt(receipt);
+  }
+
+  void populateFromExtractedReceipt(ExtractedReceipt receipt) {
+    state = ReceiptFormState.fromExtractedReceipt(receipt);
   }
 
   void applyExtractedReceipt(ExtractedReceipt receipt) {

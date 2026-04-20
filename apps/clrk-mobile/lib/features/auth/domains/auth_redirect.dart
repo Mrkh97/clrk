@@ -1,12 +1,16 @@
 const defaultAuthenticatedRoute = '/dashboard';
 
 const _disallowedPostAuthRoutes = {
+  '/auth',
   '/login',
+  '/onboarding',
   '/register',
 };
 
 String getSafeRedirectTarget(String? redirect) {
-  if (redirect != null && redirect.startsWith('/') && !redirect.startsWith('//')) {
+  if (redirect != null &&
+      redirect.startsWith('/') &&
+      !redirect.startsWith('//')) {
     final uri = Uri.tryParse(redirect);
     final path = uri?.path ?? redirect;
 

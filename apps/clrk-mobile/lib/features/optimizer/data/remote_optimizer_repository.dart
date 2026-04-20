@@ -14,11 +14,7 @@ class RemoteOptimizerRepository {
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/api/receipts/optimize',
-      data: {
-        'level': level,
-        'from': from,
-        'to': to,
-      },
+      data: {'level': level, 'from': from, 'to': to},
     );
 
     return OptimizationResult.fromJson(

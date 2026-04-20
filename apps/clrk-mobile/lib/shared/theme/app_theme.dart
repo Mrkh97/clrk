@@ -116,20 +116,27 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceSoft,
-        hintStyle: textTheme.bodyMedium?.copyWith(color: AppColors.mutedForeground),
+        hintStyle: textTheme.bodyMedium?.copyWith(
+          color: AppColors.mutedForeground,
+        ),
         labelStyle: textTheme.labelMedium,
         enabledBorder: _outlineBorder(AppColors.border),
         focusedBorder: _outlineBorder(AppColors.brand),
         errorBorder: _outlineBorder(AppColors.error),
         focusedErrorBorder: _outlineBorder(AppColors.error),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 18,
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.brand,
           foregroundColor: const Color(0xFF1A1613),
           minimumSize: const Size.fromHeight(54),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(999),
+          ),
           textStyle: GoogleFonts.spaceMono(
             fontSize: 11,
             fontWeight: FontWeight.w700,
@@ -142,7 +149,9 @@ class AppTheme {
           minimumSize: const Size.fromHeight(54),
           side: const BorderSide(color: AppColors.borderStrong),
           foregroundColor: AppColors.foreground,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(999),
+          ),
           textStyle: GoogleFonts.spaceMono(
             fontSize: 11,
             fontWeight: FontWeight.w700,
@@ -199,20 +208,15 @@ class AppTheme {
     return const LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [
-        Color(0xFF111216),
-        Color(0xFF0A0B0D),
-        Color(0xFF15161B),
-      ],
+      colors: [Color(0xFF111216), Color(0xFF0A0B0D), Color(0xFF15161B)],
       stops: [0, 0.45, 1],
     );
   }
 
   static TextStyle monoLabel(BuildContext context, {Color? color}) {
-    return Theme.of(context)
-            .textTheme
-            .labelMedium
-            ?.copyWith(color: color ?? AppColors.mutedForeground) ??
+    return Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: color ?? AppColors.mutedForeground,
+        ) ??
         GoogleFonts.spaceMono(
           fontSize: 10,
           fontWeight: FontWeight.w700,

@@ -21,35 +21,65 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = Row(
-      mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (icon != null) ...[icon!, const SizedBox(width: 8)],
-        Flexible(child: Text(label, textAlign: TextAlign.center)),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final shouldExpand = expand && constraints.hasBoundedWidth;
+        final minHeight = expand ? 52.0 : 44.0;
+
+        final content = Row(
+          mainAxisSize: shouldExpand ? MainAxisSize.max : MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) ...[icon!, const SizedBox(width: 8)],
+            if (shouldExpand)
+              Expanded(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              )
+            else
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+              ),
+          ],
+        );
+
+        final buttonStyle = switch (variant) {
+          FButtonVariant.outline => OutlinedButton.styleFrom(
+            minimumSize: Size(0, minHeight),
+            side: const BorderSide(color: AppColors.borderStrong),
+            backgroundColor: Colors.transparent,
+            foregroundColor: AppColors.foreground,
+          ),
+          _ => ElevatedButton.styleFrom(
+            minimumSize: Size(0, minHeight),
+            backgroundColor: AppColors.brand,
+            foregroundColor: const Color(0xFF14100D),
+          ),
+        };
+
+        final button = variant == FButtonVariant.outline
+            ? OutlinedButton(
+                onPressed: onPress,
+                style: buttonStyle,
+                child: content,
+              )
+            : ElevatedButton(
+                onPressed: onPress,
+                style: buttonStyle,
+                child: content,
+              );
+
+        if (shouldExpand) {
+          return SizedBox(width: double.infinity, child: button);
+        }
+
+        return button;
+      },
     );
-
-    final buttonStyle = switch (variant) {
-      FButtonVariant.outline => OutlinedButton.styleFrom(
-        minimumSize: Size.fromHeight(expand ? 52 : 44),
-        side: const BorderSide(color: AppColors.borderStrong),
-        backgroundColor: Colors.transparent,
-        foregroundColor: AppColors.foreground,
-      ),
-      _ => ElevatedButton.styleFrom(
-        minimumSize: Size.fromHeight(expand ? 52 : 44),
-        backgroundColor: AppColors.brand,
-        foregroundColor: const Color(0xFF14100D),
-      ),
-    };
-
-    final child = expand ? SizedBox(width: double.infinity, child: content) : content;
-
-    if (variant == FButtonVariant.outline) {
-      return OutlinedButton(onPressed: onPress, style: buttonStyle, child: child);
-    }
-
-    return ElevatedButton(onPressed: onPress, style: buttonStyle, child: child);
   }
 }

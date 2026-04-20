@@ -6,8 +6,9 @@ import '../theme/app_theme.dart';
 class AppTextField extends StatefulWidget {
   const AppTextField({
     required this.label,
-    required this.value,
     required this.onChanged,
+    this.value,
+    this.controller,
     this.hint,
     this.keyboardType,
     this.textInputAction,
@@ -21,7 +22,8 @@ class AppTextField extends StatefulWidget {
   });
 
   final String label;
-  final String value;
+  final String? value;
+  final TextEditingController? controller;
   final ValueChanged<String> onChanged;
   final String? hint;
   final TextInputType? keyboardType;
@@ -38,29 +40,49 @@ class AppTextField extends StatefulWidget {
 }
 
 class _AppTextFieldState extends State<AppTextField> {
-  late final TextEditingController _controller;
+  TextEditingController? _internalController;
+
+  TextEditingController get _effectiveController =>
+      widget.controller ?? _internalController!;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.value);
+
+    if (widget.controller == null) {
+      _internalController = TextEditingController(text: widget.value ?? '');
+    }
   }
 
   @override
   void didUpdateWidget(covariant AppTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.value != _controller.text) {
-      _controller.value = TextEditingValue(
-        text: widget.value,
-        selection: TextSelection.collapsed(offset: widget.value.length),
-      );
+    if (oldWidget.controller != widget.controller) {
+      if (oldWidget.controller == null) {
+        _internalController?.dispose();
+        _internalController = null;
+      }
+
+      if (widget.controller == null) {
+        _internalController = TextEditingController(text: widget.value ?? '');
+      }
+    }
+
+    if (widget.controller == null) {
+      final nextValue = widget.value ?? '';
+      if (nextValue != _effectiveController.text) {
+        _effectiveController.value = TextEditingValue(
+          text: nextValue,
+          selection: TextSelection.collapsed(offset: nextValue.length),
+        );
+      }
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _internalController?.dispose();
     super.dispose();
   }
 
@@ -72,7 +94,7 @@ class _AppTextFieldState extends State<AppTextField> {
         Text(widget.label.toUpperCase(), style: AppTheme.monoLabel(context)),
         const SizedBox(height: 8),
         TextFormField(
-          controller: _controller,
+          controller: _effectiveController,
           onChanged: widget.onChanged,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
