@@ -9,7 +9,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
-import appCss from "../styles.css?url";
+import "../styles.css";
 
 import type { QueryClient } from "@tanstack/react-query";
 
@@ -75,10 +75,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         rel: "stylesheet",
         href: GOOGLE_FONTS_HREF,
-      },
-      {
-        rel: "stylesheet",
-        href: appCss,
       },
     ],
   }),
