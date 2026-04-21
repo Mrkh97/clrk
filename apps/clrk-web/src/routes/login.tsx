@@ -10,7 +10,7 @@ import LoginPage from '#/features/authentication/presentations/components/LoginP
 
 const authSearchSchema = z.object({
   redirect: z.string().optional(),
-  verified: z.string().transform(getVerifiedSearchValue).optional(),
+  verified: z.union([z.string(), z.number()]).transform(getVerifiedSearchValue).optional(),
 })
 
 export const Route = createFileRoute('/login')({

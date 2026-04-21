@@ -227,8 +227,8 @@ export function getConfirmEmailCallbackURL(redirect?: string) {
   return new URL(target, window.location.origin).toString()
 }
 
-export function getVerifiedSearchValue(verified?: string) {
-  return verified === '1' ? '1' : undefined
+export function getVerifiedSearchValue(verified?: string | number) {
+  return verified === '1' || verified === 1 ? '1' : undefined
 }
 
 export function appendVerifiedSearch(target: string) {
