@@ -6,7 +6,7 @@
 - scan and normalize receipts with AI-assisted extraction
 - turn recent transactions into concrete savings suggestions
 
-Live app: [clrk.app](https://clrk.app)
+Live app: [clrk.app](https://www.clrk.app)
 
 ## What This Repo Contains
 

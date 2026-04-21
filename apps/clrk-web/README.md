@@ -2,7 +2,7 @@
 
 `clrk-web` is the browser client for clrk. It gives users a desktop-first finance workspace with an authenticated spending dashboard, AI-assisted receipt intake, and an optimizer flow for spotting realistic savings opportunities.
 
-Live app: [clrk.app](https://clrk.app)
+Live app: [clrk.app](https://www.clrk.app)
 
 ## Screenshots
 
